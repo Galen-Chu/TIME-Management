@@ -49,7 +49,7 @@ TimeCare 不是另一個行事曆，而是一支「**全時段覆蓋**」的時�
 ## 📁 Project Structure · 專案結構
 
 ```
-TIME-management/
+TIME-Management/
 ├── README.md
 ├── docs/                          # 開發文件（本文件集）
 │   ├── REQUIREMENTS.md            # 功能需求規格（FR/NFR 編號）
