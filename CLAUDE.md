@@ -2,12 +2,14 @@
 
 TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。目前 repo 為**開發文件集**(docs only),App 尚未建置;設計原型在 Claude Design(私有,見下方)。
 
-## 專案現況(2026-08-18)
+## 專案現況(2026-08-24)
 
 - 7 份開發文件定案並推送(root commit `48ec65b`):README + docs/{REQUIREMENTS, ARCHITECTURE, DESIGN-SPEC, DESIGN-ADDENDUM, I18N, ROADMAP}.md
-- **Phase 0 完成**:技術棧拍板 **Expo(React Native)+ TypeScript**,以 **dev client(prebuild)** 起案(背景定位偵測需要);補充設計(排程管理畫面/空狀態/語言切換列)已定案於 DESIGN-ADDENDUM.md
-- **下一步:Phase 1**(App 骨架+設計 token+i18n 骨架),細項見 docs/ROADMAP.md
-- Phase 0 尚餘:repo 基礎設施(.gitignore、LICENSE、分支策略)
+- **Phase 0 完成**(含 repo 基礎設施:.gitignore、MIT LICENSE、main+feat/* 分支策略)
+- **Phase 1 完成(2026-08-24,分支 feat/phase1-skeleton,待驗收)**:Expo SDK 57 專案(expo-router、TS strict)、tokens.json、七基礎元件+EmptyState、Onboarding+四分頁骨架(虛擬資料)、i18next 雙語對稱、ESLint CJK 規則;tsc/Jest 16 測試/lint 全綠;web 走查截圖 12 張(`.shots/`,gitignored;腳本 `scripts/web-walkthrough.py`,以 PMS 專案 `.blackvenv` 的 selenium 執行)
+- 常用指令:`npm run lint` / `npm test` / `npx tsc --noEmit` / `npx expo start --web`
+- 已知 web 限制:執行期分頁切換內容不換(RN-web bottom-tabs),直達 URL 正常;native 不受影響
+- **下一步:Phase 2**(今日核心:SQLite、三檢視接真資料、事件 CRUD),見 docs/ROADMAP.md
 
 ## 文件地圖
 

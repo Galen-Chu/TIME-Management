@@ -14,6 +14,30 @@ TimeCare 不是另一個行事曆，而是一支「**全時段覆蓋**」的時�
 
 ---
 
+## 🚧 Status · 目前進度
+
+| 階段 | 狀態 |
+|---|---|
+| Phase 0 規格凍結與技術棧 | ✅ 完成 |
+| Phase 1 App 骨架與設計系統 | ✅ 完成（2026-08-24,待驗收）|
+| Phase 2 今日核心（資料+事件） | ⬜ 下一步 |
+| Phase 3–5 | ⬜ 規劃中 |
+
+**本機執行**（Expo SDK 57 / TypeScript strict）:
+
+`ash
+npm install
+npx expo start --web   # 瀏覽器即時預覽
+npx expo start         # iOS/Android 模擬器(Expo Go)
+`
+
+品質門檻:
+pm run lint(含 NFR-6 禁寫死字串規則)、
+pm test(16 測試)、
+px tsc --noEmit。
+
+---
+
 ## ✨ Features · 功能總覽
 
 | 功能 | 說明 | 狀態 |

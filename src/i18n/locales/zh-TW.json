@@ -1,0 +1,179 @@
+{
+  "common": {
+    "confirm": "確認",
+    "delete": "刪除",
+    "later": "稍後再說",
+    "next": "繼續",
+    "start": "開始使用",
+    "skip": "跳過",
+    "save": "儲存"
+  },
+  "tabs": {
+    "today": "今天",
+    "stats": "統計",
+    "adjust": "調節",
+    "settings": "設定"
+  },
+  "categories": {
+    "work": "工作",
+    "sleep": "睡眠",
+    "meal": "用餐",
+    "exercise": "運動",
+    "leisure": "休閒",
+    "commute": "通勤",
+    "other": "其他"
+  },
+  "onboarding": {
+    "s1": {
+      "title": "看見你的一天",
+      "body": "溫柔紀錄 24 小時發生的每件事，不需要時時刻刻手動輸入。"
+    },
+    "s2": {
+      "title": "AI 溫柔猜測，你來確認",
+      "body": "自動偵測可能發生的事，只需輕輕點一下確認或修改。"
+    },
+    "s3": {
+      "title": "預測作息，適時提醒",
+      "body": "依你的節奏規劃排程，也支援彈性、非規律的生活。"
+    }
+  },
+  "today": {
+    "title": "今天",
+    "view": { "day": "日", "week": "週" },
+    "style": { "linear": "時間軸", "clock": "時鐘盤", "blocks": "日誌卡" },
+    "workDone": "今日已完成工作",
+    "routineDone": "例行工事完成",
+    "routines": "每日例行工事",
+    "confirmed": "已完成",
+    "predicted": "AI 預測 · 待確認",
+    "confirmTag": "確認",
+    "streak": "連續 {{count}} 天",
+    "streak_other": "連續 {{count}} 天",
+    "about": "約 {{time}}",
+    "hours": "{{n}} 小時",
+    "hoursShort": "{{n}} 小時",
+    "weekHint": "每一格都是已存入紀錄的真實時間分配，長按可查看該天完整明細。",
+    "currentActivity": "目前進行中",
+    "legendTotal": "共 {{n}} 小時",
+    "noActivity": "尚未記錄"
+  },
+  "sheet": {
+    "confirmTitle": "確認這段時間在做什麼？",
+    "editTitle": "編輯這筆紀錄",
+    "namePlaceholder": "活動名稱"
+  },
+  "toast": {
+    "detect": "偵測到你在「{{place}}」停留 {{minutes}} 分鐘 — 是在{{activity}}嗎？",
+    "view": "查看並確認",
+    "activity": { "work": "工作" }
+  },
+  "stats": {
+    "title": "統計分析",
+    "week": "本週",
+    "month": "本月",
+    "loggedDays": "已記錄天數",
+    "coverage": "/ {{days}} 天 · 涵蓋率 {{p}}%",
+    "breakdown": "各類別時間分佈",
+    "perDay": "平均 {{n}} 小時／日",
+    "stacked": "每日紀錄堆疊圖",
+    "insights": "洞察"
+  },
+  "adjust": {
+    "title": "彈性調節",
+    "sleep": "睡眠時間",
+    "sleepDesc": "允許 AI 依實際狀況微調提醒時間",
+    "bedtime": "入睡",
+    "wake": "起床",
+    "flex": "彈性作息",
+    "flexDesc": "不強制準時，AI 用區間取代單一時間點",
+    "irregular": "非規律模式",
+    "irregularDesc": "適合自由工作者，放寬每日排程的規律假設"
+  },
+  "settings": {
+    "title": "AI 預測與提醒",
+    "sensitivity": "預測敏感度",
+    "sens0": "低",
+    "sens1": "中",
+    "sens2": "高",
+    "sens0Desc": "較保守，只在高把握時才預測",
+    "sens1Desc": "平衡準確度與提醒頻率",
+    "sens2Desc": "積極預測，提早提醒可能的安排",
+    "leadTime": "提醒提前時間",
+    "leadTimeDesc": "事件開始前多久通知",
+    "leadTimeValue": "{{n}} 分鐘",
+    "notify": "通知風格",
+    "notifyGentle": "溫和建議卡片",
+    "notifyPush": "主動推播",
+    "quiet": "免打擾時段",
+    "quietDesc": "22:00–07:00 期間不主動推播",
+    "language": "語言 / Language",
+    "languageDesc": "切換介面語言 / Switch the interface language",
+    "langZhTW": "繁體中文",
+    "langEn": "English"
+  },
+  "schedule": {
+    "title": "排程",
+    "today": "今日排程",
+    "add": "新增",
+    "addSchedule": "新增排程",
+    "edit": "編輯排程",
+    "next": "下次 {{when}}",
+    "recurrence": {
+      "daily": "每天",
+      "weekly": "每週",
+      "biweekly": "每兩週一次",
+      "once": "單次"
+    },
+    "weekday": {
+      "1": "一",
+      "2": "二",
+      "3": "三",
+      "4": "四",
+      "5": "五",
+      "6": "六",
+      "7": "日"
+    },
+    "weekdayFull": {
+      "1": "週一",
+      "2": "週二",
+      "3": "週三",
+      "4": "週四",
+      "5": "週五",
+      "6": "週六",
+      "7": "週日"
+    },
+    "time": "時間",
+    "duration": "時長",
+    "category": "類別",
+    "reminder": "提醒",
+    "titleField": "標題"
+  },
+  "empty": {
+    "log": {
+      "title": "還沒有任何紀錄",
+      "body": "今晚回顧時，補上今天的第一段時間吧"
+    },
+    "routines": {
+      "title": "還沒有例行工事",
+      "body": "建立一個小到不可能失敗的習慣"
+    },
+    "stats": {
+      "title": "數字會在記錄幾天後出現",
+      "body": "每天一點紀錄，很快就會看到你的節奏"
+    },
+    "week": {
+      "title": "這週還是空的",
+      "body": "從今天開始吧"
+    },
+    "schedule": {
+      "title": "沒有固定排程",
+      "body": "新增會議、課程或習慣課表"
+    }
+  },
+  "insights": {
+    "workAvg": "本週工作時數平均每天 {{avg}} 小時，較上週{{trend}}，集中在平日{{period}}。",
+    "trendUp": "增加 {{diff}} 小時",
+    "trendDown": "減少 {{diff}} 小時",
+    "weekendSleep": "週末睡眠時間比平日晚了約 {{diff}} 小時，作息落差主要出現在週五、六。"
+  }
+}
