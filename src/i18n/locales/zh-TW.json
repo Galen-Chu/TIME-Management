@@ -49,6 +49,12 @@
     "confirmTag": "確認",
     "streak": "連續 {{count}} 天",
     "streak_other": "連續 {{count}} 天",
+
+    "seedRoutine": {
+      "meditation": "晨間冥想",
+      "walk": "走路 20 分鐘",
+      "reading": "閱讀 30 分鐘"
+    },
     "about": "約 {{time}}",
     "hours": "{{n}} 小時",
     "hoursShort": "{{n}} 小時",
@@ -60,6 +66,9 @@
   "sheet": {
     "confirmTitle": "確認這段時間在做什麼？",
     "editTitle": "編輯這筆紀錄",
+    "createTitle": "新增這段時間的紀錄",
+    "nameLabel": "名稱",
+    "categoryField": "類別",
     "namePlaceholder": "活動名稱"
   },
   "toast": {

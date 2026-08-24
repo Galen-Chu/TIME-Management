@@ -1,54 +1,82 @@
 /**
- * 時間軸檢視(FR-TOD 1):24 小時垂直時間軸。
- * 每小時 40px、每 2 小時刻度;事件塊已確認=實心底白字、
- * 預測=類別色 22% 底+2px 虛線框+類別色字;現在線 2px accent+圓點+時間標籤。
+ * 時間軸檢視(FR-TOD 1):24 小時垂直時間軸(40px/h、每 2 小時刻度)。
+ * 事件塊:已確認=實心白字;預測=淡底虛線框;跨午夜拆兩塊(timelineBlocks)。
+ * 現在線 = 即時時刻(nowHours)。點事件塊 → onSelect;點空白 → onCreate(tapY→小時)。
  */
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { CategoryKey } from '../../domain/categories';
+import { timelineBlocks, nowHours, snap, type Event } from '../../domain/events';
 import { formatClock } from '../../i18n/format';
-import { MOCK_NOW, type MockEvent } from '../../mock/today';
 import { categoryColor, categoryFaded, color, font, timeline } from '../../theme';
+import { currentLanguage, useSettings } from '../../state/settings';
 
 const H = timeline.pxPerHour;
 
-export function TimelineView({ events }: { events: MockEvent[] }) {
-  const nowY = MOCK_NOW * H;
+interface Props {
+  events: Event[];
+  onSelect: (e: Event) => void;
+  onCreate: (start: number) => void;
+}
+
+export function TimelineView({ events, onSelect, onCreate }: Props) {
+  const now = nowHours();
+  const nowY = now * H;
+
   return (
     <View style={styles.wrap}>
       <View style={styles.scroll}>
-        {/* 小時刻度 */}
         {Array.from({ length: 13 }, (_, i) => i * 2).map((h) => (
           <View key={h} style={[styles.tick, { top: h * H }]}>
-            <Text style={styles.tickText}>{String(h).padStart(2, '0')}:00</Text>
+            <Text style={styles.tickText}>{formatClock(h)}</Text>
           </View>
         ))}
-        {/* 背景格線 */}
         <View style={[styles.grid, { height: 24 * H }]} />
 
-        {/* 事件塊 */}
-        {events.map((e) => (
-          <EventBlock key={e.id} event={e} />
-        ))}
+        {/* 點空白新增:覆蓋整軸的下層按壓層 */}
+        <Pressable
+          accessibilityLabel="add event"
+          style={[styles.tapLayer, { height: 24 * H }]}
+          onPress={(e) => {
+            const n = e.nativeEvent as { locationY?: number; offsetY?: number; layerY?: number; pageY?: number };
+            // RN-native 提供 locationY;RN-web 提供 offsetY/layerY
+            const y = n.locationY ?? n.offsetY ?? n.layerY;
+            const hour = y != null && y >= 0 ? snap(y / H) : snap(nowHours());
+            onCreate(hour);
+          }}
+        />
 
-        {/* 現在線 */}
+        {events.map((e) =>
+          timelineBlocks(e).map((b, bi) => (
+            <EventBlock key={`${e.id}-${bi}`} event={e} block={b} onSelect={onSelect} />
+          ))
+        )}
+
         <View style={[styles.now, { top: nowY }]}>
           <View style={styles.nowDot} />
           <View style={styles.nowLine} />
-          <Text style={styles.nowLabel}>{formatClock(MOCK_NOW)}</Text>
+          <Text style={styles.nowLabel}>{formatClock(now)}</Text>
         </View>
       </View>
     </View>
   );
 }
 
-function EventBlock({ event }: { event: MockEvent }) {
+function EventBlock({
+  event,
+  block,
+  onSelect,
+}: {
+  event: Event;
+  block: { start: number; hours: number; tail: boolean };
+  onSelect: (e: Event) => void;
+}) {
   const c = categoryColor(event.category);
-  const top = event.start * H;
-  const height = Math.max((event.end - event.start) * H - 2, 20);
+  const top = block.start * H;
+  const height = Math.max(block.hours * H - 2, 20);
   return (
-    <View
-      accessibilityLabel={event.labelZh}
+    <Pressable
+      accessibilityLabel={event.label}
+      onPress={() => onSelect(event)}
       style={[
         styles.event,
         {
@@ -68,9 +96,9 @@ function EventBlock({ event }: { event: MockEvent }) {
         }}
         numberOfLines={1}
       >
-        {event.labelZh}
+        {event.label}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
@@ -85,6 +113,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: color.divider,
   },
+  tapLayer: { position: 'absolute', left: timeline.leftGutter, right: 0, top: 0 },
   tick: { position: 'absolute', left: 0, top: 0, height: 14 },
   tickText: {
     width: timeline.leftGutter - 14,

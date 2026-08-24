@@ -1,57 +1,66 @@
 /**
- * 週檢視(FR-TOD):說明文字 + 週一至日 7 列,左星期標籤(今天粗體深色)、
- * 右「24h」、14px 堆疊色條依類別佔比。長按互動 Phase 2 接資料。
+ * 週檢視(FR-TOD):7 日堆疊條(週一在前)。長按 → 該日日檢視(onPickDate)。
  */
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { CATEGORY_KEYS } from '../../domain/categories';
+import { hoursByCategory, shiftDate, type Event } from '../../domain/events';
 import { currentLanguage, useSettings } from '../../state/settings';
-import { mockWeek } from '../../mock/today';
-import { categoryColor, color, font, radius } from '../../theme';
+import { categoryColor, color, font } from '../../theme';
 
-/** 週一在前 */
 const ORDERED = [1, 2, 3, 4, 5, 6, 0];
-const TODAY_WEEKDAY = 1; // mock 基準日 2026-08-24 週一
 
-export function WeekView() {
+interface Props {
+  weekEvents: Event[];
+  date: string; // 所在日
+  onPickDate: (date: string) => void;
+}
+
+export function WeekView({ weekEvents, date, onPickDate }: Props) {
   const { t } = useTranslation();
-  const settings = useSettings((s) => s.settings);
-  const lang = currentLanguage(settings);
+
+  // 週一為首
+  const wd = new Date(`${date}T00:00:00`).getDay();
+  const idx = wd === 0 ? 7 : wd;
+  const weekStart = shiftDate(date, -(idx - 1));
 
   return (
     <View style={styles.wrap}>
       <Text style={styles.hint}>{t('today.weekHint')}</Text>
-      {ORDERED.map((wd) => {
-        const day = mockWeek.find((d) => d.weekday === wd);
-        const total = Object.values(day?.hours ?? {}).reduce((s, v) => s + (v ?? 0), 0);
-        const isToday = wd === TODAY_WEEKDAY;
+      {ORDERED.map((dow, i) => {
+        const dayKey = shiftDate(weekStart, i);
+        const dayEvents = weekEvents.filter((e) => e.date === dayKey && !e.predicted);
+        const hours = hoursByCategory(dayEvents);
+        const isToday = dayKey === date;
         return (
-          <View key={wd} style={styles.row}>
-            <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>
-              {t(`schedule.weekdayFull.${wd}`)}
-            </Text>
-            <View style={styles.barTrack}>
-              {CATEGORY_KEYS.map((k) => {
-                const h = day?.hours?.[k] ?? 0;
-                if (h <= 0) return null;
-                return (
-                  <View
-                    key={k}
-                    accessibilityLabel={t(`categories.${k}`) + ' ' + String(h)}
-                    style={{
-                      width: `${(h / 24) * 100}%`,
-                      backgroundColor: categoryColor(k),
-                    }}
-                  />
-                );
-              })}
+          <Pressable
+            key={dow}
+            onLongPress={() => onPickDate(dayKey)}
+            accessibilityRole="button"
+            accessibilityLabel={dayKey}
+          >
+            <View style={styles.row}>
+              <Text style={[styles.dayLabel, isToday && styles.dayLabelToday]}>
+                {t(`schedule.weekdayFull.${i + 1}`)}
+              </Text>
+              <View style={styles.barTrack}>
+                {CATEGORY_KEYS.map((k) => {
+                  const h = hours[k] ?? 0;
+                  if (h <= 0) return null;
+                  return (
+                    <View
+                      key={k}
+                      style={{ width: `${(h / 24) * 100}%`, backgroundColor: categoryColor(k) }}
+                    />
+                  );
+                })}
+              </View>
+              <Text style={[styles.total, isToday && styles.dayLabelToday]}>24h</Text>
             </View>
-            <Text style={[styles.total, isToday && styles.dayLabelToday]}>24h</Text>
-          </View>
+          </Pressable>
         );
       })}
-      {/* 圖例 */}
       <View style={styles.legend}>
         {CATEGORY_KEYS.map((k) => (
           <View key={k} style={styles.legendItem}>
@@ -66,20 +75,9 @@ export function WeekView() {
 
 const styles = StyleSheet.create({
   wrap: { gap: 10 },
-  hint: {
-    fontSize: 13,
-    color: color.inkSecondary,
-    fontFamily: font.rounded.medium,
-    lineHeight: 19,
-    marginBottom: 4,
-  },
+  hint: { fontSize: 13, color: color.inkSecondary, fontFamily: font.rounded.medium, lineHeight: 19, marginBottom: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  dayLabel: {
-    width: 44,
-    fontSize: 12,
-    color: color.inkMuted,
-    fontFamily: font.rounded.medium,
-  },
+  dayLabel: { width: 44, fontSize: 12, color: color.inkMuted, fontFamily: font.rounded.medium },
   dayLabelToday: { color: color.ink, fontFamily: font.rounded.bold },
   barTrack: {
     flex: 1,

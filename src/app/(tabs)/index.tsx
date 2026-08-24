@@ -1,38 +1,53 @@
 /**
- * 今天分頁(FR-TOD):標題區(日期+大標+日/週分段)→
- * 日檢視(時間軸/時鐘盤/日誌卡三呈現)或週檢視。Phase 1 虛擬資料。
+ * 今天分頁(FR-TOD):標題區 → 日(時間軸/時鐘盤/日誌卡)/週。
+ * Phase 2:真資料(todayStore)+ 事件表單 Sheet + 點空白新增 + 週長按進該日。
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
 import { BlocksView } from '../../components/today/blocks-view';
 import { ClockView } from '../../components/today/clock-view';
+import { EventSheet } from '../../components/today/event-sheet';
 import { TimelineView } from '../../components/today/timeline-view';
 import { WeekView } from '../../components/today/week-view';
 import { Segmented } from '../../components/ui/segmented';
+import { createRepositories } from '../../data/db';
 import { formatHeaderDate } from '../../i18n/format';
-import { MOCK_DATE, mockEvents } from '../../mock/today';
-import { currentLanguage, useSettings } from '../../state/settings';
+import { useTodayStore } from '../../state/todayStore';
 import { color, font, spacing } from '../../theme';
+import type { Event } from '../../domain/events';
 
 type DayWeek = 'day' | 'week';
 type DayStyle = 'linear' | 'clock' | 'blocks';
 
 export default function TodayScreen() {
   const { t } = useTranslation();
-  const settings = useSettings((s) => s.settings);
-  const lang = currentLanguage(settings);
+  const { date, events, weekEvents, load } = useTodayStore();
+
   const [dayWeek, setDayWeek] = useState<DayWeek>('day');
   const [style, setStyle] = useState<DayStyle>('linear');
+  const [selected, setSelected] = useState<Event | null>(null);
+  const [creating, setCreating] = useState<{ start: number; end: number } | null>(null);
 
-  const headerDate = formatHeaderDate(new Date(`${MOCK_DATE}T00:00:00`), lang);
+  useEffect(() => {
+    (async () => {
+      const repos = await createRepositories();
+      useTodayStore.getState().attach(repos.events, repos.routines);
+      await useTodayStore.getState().load();
+    })();
+  }, []);
+
+  const headerDate = formatHeaderDate(new Date(`${date}T00:00:00`), 'zh-TW');
+  const closeSheet = () => {
+    setSelected(null);
+    setCreating(null);
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* 標題區 */}
         <View style={styles.header}>
           <View>
             <Text style={styles.date}>{headerDate}</Text>
@@ -61,17 +76,32 @@ export default function TodayScreen() {
               ]}
             />
             <View style={styles.body}>
-              {style === 'linear' && <TimelineView events={mockEvents} />}
-              {style === 'clock' && <ClockView events={mockEvents} />}
-              {style === 'blocks' && <BlocksView />}
+              {style === 'linear' && (
+                <TimelineView
+                  events={events}
+                  onSelect={setSelected}
+                  onCreate={(start) => setCreating({ start, end: start + 1 })}
+                />
+              )}
+              {style === 'clock' && <ClockView events={events} />}
+              {style === 'blocks' && <BlocksView onSelect={setSelected} />}
             </View>
           </>
         ) : (
           <View style={styles.body}>
-            <WeekView />
+            <WeekView
+              weekEvents={weekEvents}
+              date={date}
+              onPickDate={(d) => {
+                setDayWeek('day');
+                void load(d);
+              }}
+            />
           </View>
         )}
       </ScrollView>
+
+      <EventSheet event={selected} creating={creating} onClose={closeSheet} />
     </SafeAreaView>
   );
 }
