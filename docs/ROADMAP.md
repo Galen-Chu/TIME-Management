@@ -22,16 +22,19 @@
 - [x] 使用者審核 docs/ 文件（2026-08-18 核可；含 DESIGN-ADDENDUM）
 - [x] 技術棧拍板：Expo（React Native）＋ TypeScript，dev client 起案（2026-08-18，見 ARCHITECTURE.md）
 - [x] 待補設計產出：排程管理畫面、空狀態、語言切換列已定案（DESIGN-ADDENDUM.md）；類別徽章英文化維持 Phase 1 拍板
-- [ ] repo 基礎設施：`.gitignore`、LICENSE、分支策略（main ＋功能分支）
+- [x] repo 基礎設施：`.gitignore`、LICENSE（MIT）、分支策略（main＋feat/* 功能分支，2026-08-24）
 
 ## ✅ Phase 1 · App 骨架與設計系統
 
-- [ ] Expo dev client 專案建置（背景定位需 prebuild，見 ARCHITECTURE）
-- [ ] `theme/tokens.json` 落地（對應 DESIGN-SPEC，單一事實來源）
-- [ ] 基礎元件：Segmented、Stepper、Toggle、Card、CategoryChip、BottomSheet、Toast
-- [ ] 畫面骨架：Onboarding 3 步＋4 分頁導覽（含虛擬資料）
-- [ ] i18n 骨架：i18next 建置、zh-TW locale 全量、lint 規則上線
-- [ ] 走查：對照原型逐畫面檢查（間距/圓角/色碼/動效）
+- [x] Expo 專案建置（SDK 57、expo-router、TypeScript strict;prebuild/dev client 留待 Phase 4 背景定位時進行，Phase 1–3 以 Expo Go／web 開發即可）
+- [x] `theme/tokens.json` 落地（對應 DESIGN-SPEC，單一事實來源）
+- [x] 基礎元件：Segmented、Stepper、Toggle、Card、CategoryChip、BottomSheet、Toast（＋EmptyState）
+- [x] 畫面骨架：Onboarding 3 步＋4 分頁導覽（含虛擬資料;今天三檢視＋週檢視、統計四卡、彈性調節、AI 設定＋語言切換）
+- [x] i18n 骨架：i18next 建置、zh-TW/en-US locale 對稱全量、ESLint 禁寫死 CJK 規則（NFR-6）
+- [x] 自動驗證：tsc strict 通過;Jest 16/16（token 完整性、雙語 key 對稱、領域不變量、元件互動）;web 走查（headless 截圖 12 張＋像素驗證）
+- [ ] 走查:對照原型逐畫面檢查(間距/圓角/色碼/動效)——**待使用者驗收(2026-08-24 提交)**
+
+> 已知 web 限制(不影響 native):執行期切換分頁時畫面內容不隨之切換(RN-web bottom-tabs 行為),直達 URL 則完全正常;走查截圖以直達 URL 模式產製。
 
 ## ✅ Phase 2 · 今日核心
 

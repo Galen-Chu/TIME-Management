@@ -1,0 +1,179 @@
+{
+  "common": {
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "later": "Later",
+    "next": "Continue",
+    "start": "Get Started",
+    "skip": "Skip",
+    "save": "Save"
+  },
+  "tabs": {
+    "today": "Today",
+    "stats": "Stats",
+    "adjust": "Adjust",
+    "settings": "Settings"
+  },
+  "categories": {
+    "work": "Work",
+    "sleep": "Sleep",
+    "meal": "Meals",
+    "exercise": "Exercise",
+    "leisure": "Leisure",
+    "commute": "Commute",
+    "other": "Other"
+  },
+  "onboarding": {
+    "s1": {
+      "title": "See your day",
+      "body": "Gently log all 24 hours of your day — no constant manual entry needed."
+    },
+    "s2": {
+      "title": "AI guesses gently, you confirm",
+      "body": "We detect what's likely happening — just tap to confirm or edit."
+    },
+    "s3": {
+      "title": "Predict your rhythm, remind in time",
+      "body": "Plans around your rhythm — flexible and irregular lifestyles welcome."
+    }
+  },
+  "today": {
+    "title": "Today",
+    "view": { "day": "Day", "week": "Week" },
+    "style": { "linear": "Timeline", "clock": "Clock", "blocks": "Day Cards" },
+    "workDone": "Work completed today",
+    "routineDone": "Routines done",
+    "routines": "Daily Routines",
+    "confirmed": "Completed",
+    "predicted": "AI Predicted · To Confirm",
+    "confirmTag": "Confirm",
+    "streak": "{{count}}-day streak",
+    "streak_other": "{{count}}-day streak",
+    "about": "around {{time}}",
+    "hours": "{{n}} h",
+    "hoursShort": "{{n}} h",
+    "weekHint": "Every segment is real logged time. Long-press a day for full details.",
+    "currentActivity": "Happening now",
+    "legendTotal": "{{n}} h total",
+    "noActivity": "Not logged yet"
+  },
+  "sheet": {
+    "confirmTitle": "What were you doing?",
+    "editTitle": "Edit this entry",
+    "namePlaceholder": "Activity name"
+  },
+  "toast": {
+    "detect": "You've been at \"{{place}}\" for {{minutes}} min — were you {{activity}}?",
+    "view": "View & confirm",
+    "activity": { "work": "working" }
+  },
+  "stats": {
+    "title": "Analytics",
+    "week": "This Week",
+    "month": "This Month",
+    "loggedDays": "Days logged",
+    "coverage": "/ {{days}} days · {{p}}% coverage",
+    "breakdown": "Time by category",
+    "perDay": "avg {{n}} h/day",
+    "stacked": "Daily log",
+    "insights": "Insights"
+  },
+  "adjust": {
+    "title": "Flexible Rhythm",
+    "sleep": "Sleep window",
+    "sleepDesc": "Let AI fine-tune reminders around your actual sleep",
+    "bedtime": "Bedtime",
+    "wake": "Wake up",
+    "flex": "Flexible schedule",
+    "flexDesc": "No forced punctuality — AI works with time ranges, not fixed points",
+    "irregular": "Irregular mode",
+    "irregularDesc": "For freelancers — relaxes daily-rhythm assumptions"
+  },
+  "settings": {
+    "title": "AI Prediction & Reminders",
+    "sensitivity": "Prediction sensitivity",
+    "sens0": "Low",
+    "sens1": "Medium",
+    "sens2": "High",
+    "sens0Desc": "Conservative — predicts only when highly confident",
+    "sens1Desc": "Balances accuracy and reminder frequency",
+    "sens2Desc": "Predicts aggressively, reminds earlier",
+    "leadTime": "Reminder lead time",
+    "leadTimeDesc": "How long before an event to notify",
+    "leadTimeValue": "{{n}} min",
+    "notify": "Notification style",
+    "notifyGentle": "Gentle suggestion cards",
+    "notifyPush": "Proactive push",
+    "quiet": "Quiet hours",
+    "quietDesc": "No proactive pushes between 22:00–07:00",
+    "language": "語言 / Language",
+    "languageDesc": "切換介面語言 / Switch the interface language",
+    "langZhTW": "繁體中文",
+    "langEn": "English"
+  },
+  "schedule": {
+    "title": "Schedules",
+    "today": "Today's schedule",
+    "add": "Add",
+    "addSchedule": "New schedule",
+    "edit": "Edit schedule",
+    "next": "Next {{when}}",
+    "recurrence": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "biweekly": "Every 2 weeks",
+      "once": "Once"
+    },
+    "weekday": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun"
+    },
+    "weekdayFull": {
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday",
+      "7": "Sunday"
+    },
+    "time": "Time",
+    "duration": "Duration",
+    "category": "Category",
+    "reminder": "Reminder",
+    "titleField": "Title"
+  },
+  "empty": {
+    "log": {
+      "title": "Nothing logged yet",
+      "body": "Add your first moment when you review tonight"
+    },
+    "routines": {
+      "title": "No routines yet",
+      "body": "Start one small enough not to fail"
+    },
+    "stats": {
+      "title": "Numbers appear after a few days",
+      "body": "A little each day — your rhythm will show soon"
+    },
+    "week": {
+      "title": "This week is still blank",
+      "body": "Start today"
+    },
+    "schedule": {
+      "title": "No schedules yet",
+      "body": "Add meetings, classes, or rituals"
+    }
+  },
+  "insights": {
+    "workAvg": "You averaged {{avg}} h of work per day this week, {{trend}} from last week, mostly on weekdays {{period}}.",
+    "trendUp": "up {{diff}} h",
+    "trendDown": "down {{diff}} h",
+    "weekendSleep": "Weekend sleep runs about {{diff}} h later than weekdays — the gap comes mostly from Fri & Sat."
+  }
+}
