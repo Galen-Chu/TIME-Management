@@ -49,6 +49,12 @@
     "confirmTag": "Confirm",
     "streak": "{{count}}-day streak",
     "streak_other": "{{count}}-day streak",
+
+    "seedRoutine": {
+      "meditation": "Morning meditation",
+      "walk": "20-min walk",
+      "reading": "30-min reading"
+    },
     "about": "around {{time}}",
     "hours": "{{n}} h",
     "hoursShort": "{{n}} h",
@@ -60,6 +66,9 @@
   "sheet": {
     "confirmTitle": "What were you doing?",
     "editTitle": "Edit this entry",
+    "createTitle": "Log this time",
+    "nameLabel": "Name",
+    "categoryField": "Category",
     "namePlaceholder": "Activity name"
   },
   "toast": {

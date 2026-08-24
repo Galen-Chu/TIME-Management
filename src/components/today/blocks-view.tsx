@@ -1,38 +1,39 @@
 /**
- * 日誌卡檢視(FR-TOD 3):
- * 兩張統計卡 + 今日排程 + 每日例行工事 + 已完成 + AI 預測待確認。
- * Phase 1 為虛擬資料靜態骨架;「有資料才顯示」區塊照 ADDENDUM §B3 原則。
+ * 日誌卡檢視(FR-TOD 3):統計卡×2 + 今日排程 + 例行工事 + 已完成 + AI 預測待確認。
+ * Phase 2:接 store 真資料;空狀態依 DESIGN-ADDENDUM §B(常駐區塊才有)。
  */
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Card } from '../ui/card';
+import { EmptyState } from '../ui/empty-state';
 import { categoryLabelKey } from '../../domain/categories';
+import { durationOf, formatRangeSafe, type Event } from './view-helpers';
 import { formatHours, formatRange } from '../../i18n/format';
 import { currentLanguage, useSettings } from '../../state/settings';
-import {
-  mockEvents,
-  mockRoutines,
-  mockSchedules,
-  type MockEvent,
-} from '../../mock/today';
+import { useTodayStore } from '../../state/todayStore';
 import { categoryColor, color, font, radius } from '../../theme';
 
-export function BlocksView() {
+interface Props {
+  onSelect: (e: Event) => void;
+}
+
+export function BlocksView({ onSelect }: Props) {
   const { t } = useTranslation();
   const settings = useSettings((s) => s.settings);
   const lang = currentLanguage(settings);
+  const { events, routines, toggleRoutine } = useTodayStore();
+  const routineLabel = (l: string) => (l.startsWith('today.') ? t(l) : l);
 
-  const confirmed = mockEvents.filter((e) => !e.predicted);
-  const predicted = mockEvents.filter((e) => e.predicted);
+  const confirmed = events.filter((e) => !e.predicted);
+  const predicted = events.filter((e) => e.predicted);
   const workHours = confirmed
     .filter((e) => e.category === 'work')
-    .reduce((s, e) => s + (e.end - e.start), 0);
-  const doneRoutines = mockRoutines.filter((r) => r.done).length;
+    .reduce((s, e) => s + durationOf(e), 0);
+  const doneCount = routines.filter((r) => r.doneToday).length;
 
   return (
     <View style={styles.wrap}>
-      {/* 統計卡兩張 */}
       <View style={styles.statRow}>
         <Card style={styles.statCard}>
           <Text style={styles.statLabel}>{t('today.workDone')}</Text>
@@ -41,97 +42,82 @@ export function BlocksView() {
         <Card style={styles.statCard}>
           <Text style={styles.statLabel}>{t('today.routineDone')}</Text>
           <Text style={styles.statValue}>
-            {doneRoutines}/{mockRoutines.length}
+            {doneCount}/{routines.length}
           </Text>
         </Card>
       </View>
 
-      {/* 今日排程(ADDENDUM §A4;Phase 3 完整互動) */}
-      <SectionTitle>{t('schedule.today')}</SectionTitle>
-      {mockSchedules.map((s) => (
-        <Card key={s.id} style={styles.row}>
-          <View style={[styles.catBadge, { backgroundColor: categoryColor(s.category) }]} />
-          <View style={styles.rowMain}>
-            <Text style={styles.rowTitle}>{lang === 'zh-TW' ? s.titleZh : s.titleEn}</Text>
-            <Text style={styles.rowMeta}>
-              {t('schedule.time')} {formatRange(s.time, s.time + s.durationH)}
-            </Text>
-          </View>
-        </Card>
-      ))}
-
-      {/* 每日例行工事 */}
       <SectionTitle>{t('today.routines')}</SectionTitle>
-      {mockRoutines.map((r) => (
-        <Pressable key={r.id} accessibilityRole="checkbox" style={styles.cardTouchable}>
-          <Card style={styles.row}>
-            <View style={[styles.check, r.done && styles.checkDone]}>
-              {r.done ? <Text style={styles.checkMark}>✓</Text> : null}
-            </View>
-            <View style={styles.rowMain}>
-              <Text style={[styles.rowTitle, r.done && styles.doneTitle]}>
-                {lang === 'zh-TW' ? r.labelZh : r.labelEn}
-              </Text>
-              <Text style={styles.rowMeta}>
-                {t('today.streak', { count: r.streak })} · {t('today.about', { time: r.timeHint })}
-              </Text>
-            </View>
-          </Card>
-        </Pressable>
-      ))}
+      {routines.length === 0 ? (
+        <EmptyState title={t('empty.routines.title')} body={t('empty.routines.body')} />
+      ) : (
+        routines.map((r) => (
+          <Pressable
+            key={r.id}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: r.doneToday }}
+            onPress={() => toggleRoutine(r.id)}
+          >
+            <Card style={styles.row}>
+              <View style={[styles.check, r.doneToday && styles.checkDone]}>
+                {r.doneToday ? <Text style={styles.checkMark}>✓</Text> : null}
+              </View>
+              <View style={styles.rowMain}>
+                <Text style={[styles.rowTitle, r.doneToday && styles.doneTitle]}>
+                  {routineLabel(r.label)}
+                </Text>
+                <Text style={styles.rowMeta}>
+                  {t('today.streak', { count: r.streak })} · {t('today.about', { time: r.timeHint })}
+                </Text>
+              </View>
+            </Card>
+          </Pressable>
+        ))
+      )}
 
-      {/* 已完成 */}
       {confirmed.length > 0 && (
         <>
           <SectionTitle>{t('today.confirmed')}</SectionTitle>
           {confirmed.map((e) => (
-            <EventRow key={e.id} event={e} lang={lang} />
+            <Card key={e.id} style={styles.row}>
+              <View style={[styles.catBadge, { backgroundColor: categoryColor(e.category) }]} />
+              <View style={styles.rowMain}>
+                <Text style={styles.rowTitle}>{e.label}</Text>
+                <Text style={styles.rowMeta}>
+                  {t(categoryLabelKey(e.category))} · {formatRange(e.start, e.end)}
+                </Text>
+              </View>
+            </Card>
           ))}
         </>
       )}
 
-      {/* AI 預測 · 待確認 */}
       {predicted.length > 0 && (
         <>
           <SectionTitle>{t('today.predicted')}</SectionTitle>
           {predicted.map((e) => (
-            <View
-              key={e.id}
-              style={[
-                styles.predictedCard,
-                { borderColor: categoryColor(e.category) },
-              ]}
-            >
-              <View style={[styles.catBadge, { backgroundColor: categoryColor(e.category) }]} />
-              <View style={styles.rowMain}>
-                <Text style={[styles.rowTitle, { color: categoryColor(e.category) }]}>
-                  {lang === 'zh-TW' ? e.labelZh : e.labelEn}
-                </Text>
-                <Text style={styles.rowMeta}>{formatRange(e.start, e.end)}</Text>
+            <Pressable key={e.id} onPress={() => onSelect(e)} accessibilityRole="button">
+              <View style={[styles.predictedCard, { borderColor: categoryColor(e.category) }]}>
+                <View style={[styles.catBadge, { backgroundColor: categoryColor(e.category) }]} />
+                <View style={styles.rowMain}>
+                  <Text style={[styles.rowTitle, { color: categoryColor(e.category) }]}>
+                    {e.label}
+                  </Text>
+                  <Text style={styles.rowMeta}>{formatRange(e.start, e.end)}</Text>
+                </View>
+                <View style={styles.confirmTag}>
+                  <Text style={styles.confirmTagText}>{t('today.confirmTag')}</Text>
+                </View>
               </View>
-              <View style={styles.confirmTag}>
-                <Text style={styles.confirmTagText}>{t('today.confirmTag')}</Text>
-              </View>
-            </View>
+            </Pressable>
           ))}
         </>
       )}
-    </View>
-  );
-}
 
-function EventRow({ event, lang }: { event: MockEvent; lang: 'zh-TW' | 'en-US' }) {
-  const { t } = useTranslation();
-  return (
-    <Card style={styles.row}>
-      <View style={[styles.catBadge, { backgroundColor: categoryColor(event.category) }]} />
-      <View style={styles.rowMain}>
-        <Text style={styles.rowTitle}>{lang === 'zh-TW' ? event.labelZh : event.labelEn}</Text>
-        <Text style={styles.rowMeta}>
-          {t(categoryLabelKey(event.category))} · {formatRange(event.start, event.end)}
-        </Text>
-      </View>
-    </Card>
+      {events.length === 0 && (
+        <EmptyState title={t('empty.log.title')} body={t('empty.log.body')} />
+      )}
+    </View>
   );
 }
 
@@ -152,13 +138,8 @@ const styles = StyleSheet.create({
     fontFamily: font.rounded.semibold,
     color: color.inkSecondary,
   },
-  cardTouchable: {},
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
-  catBadge: {
-    width: 22,
-    height: 22,
-    borderRadius: 7,
-  },
+  catBadge: { width: 22, height: 22, borderRadius: 7 },
   check: {
     width: 26,
     height: 26,
@@ -188,11 +169,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  confirmTag: {
-    backgroundColor: color.track,
-    borderRadius: 100,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-  },
+  confirmTag: { backgroundColor: color.track, borderRadius: 100, paddingVertical: 4, paddingHorizontal: 12 },
   confirmTagText: { fontSize: 12, color: color.ink, fontFamily: font.rounded.semibold },
 });

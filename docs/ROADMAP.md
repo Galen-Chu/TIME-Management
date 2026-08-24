@@ -38,13 +38,13 @@
 
 ## ✅ Phase 2 · 今日核心
 
-- [ ] SQLite schema ＋ migration ＋ repository（ARCHITECTURE 資料模型）
-- [ ] 事件領域邏輯：重疊判定、跨午夜、時間軸幾何（40px/h）
-- [ ] 時間軸／時鐘盤（conic-gradient）／日誌卡三檢視
-- [ ] 週檢視堆疊條＋長按進該日
-- [ ] 事件表單 CRUD：改名、換類別、刪除、確認
-- [ ] 單元測試：領域純函式（重疊/跨日/夾限）
-- [ ] 空狀態元件與各情境文案（DESIGN-ADDENDUM §B）
+- [x] SQLite schema ＋ migration ＋ repository（ARCHITECTURE 資料模型）
+- [x] 事件領域邏輯：重疊判定、跨午夜、時間軸幾何（40px/h）
+- [x] 時間軸／時鐘盤（SVG 弧段）／日誌卡三檢視（接真資料）
+- [x] 週檢視堆疊條＋長按進該日
+- [x] 事件表單 CRUD：改名、換類別、刪除、確認（新增/確認/編輯三模式）
+- [x] 單元測試：領域純函式 36 測試（重疊/跨日/夾限/streak/CRUD 流程）
+- [x] 空狀態元件與情境文案接線（DESIGN-ADDENDUM §B）
 
 ## ✅ Phase 3 · 例行工事與統計分析
 
