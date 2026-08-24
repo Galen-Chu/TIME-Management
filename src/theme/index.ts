@@ -17,20 +17,28 @@ export const fontFamily = tokens.font.family
   .filter(Boolean);
 
 /** 主要字體(依載入的 Google Fonts 實名)。
- * 注意:M PLUS Rounded 1c 家族無 600 SemiBold,semibold 以 700 替代。 */
+ * 注意:M PLUS Rounded 1c 家族無 600 SemiBold,semibold 以 700 替代。
+ * 字型涵蓋:M PLUS Rounded 1c 為日文字型,部分繁中字(如「溫」「你」)缺字;
+ * web 端以 Noto Sans TC 作回落(由 _layout 注入 Google Fonts 連結),
+ * native 端缺字自動回落系統字型。 */
+import { Platform } from 'react-native';
+
+const STACK = (f: string) =>
+  Platform.OS === 'web' ? `${f}, 'Noto Sans TC', sans-serif` : f;
+
 export const font = {
   /** M PLUS Rounded 1c — 標題/中文優先 */
   rounded: {
-    medium: 'MPLUSRounded1c-Medium',
-    semibold: 'MPLUSRounded1c-Bold',
-    bold: 'MPLUSRounded1c-Bold',
+    medium: STACK('MPLUSRounded1c-Medium'),
+    semibold: STACK('MPLUSRounded1c-Bold'),
+    bold: STACK('MPLUSRounded1c-Bold'),
   },
   /** Karla — 拉丁文內文 */
   karla: {
-    regular: 'Karla-Regular',
-    medium: 'Karla-Medium',
-    semibold: 'Karla-SemiBold',
-    bold: 'Karla-Bold',
+    regular: STACK('Karla-Regular'),
+    medium: STACK('Karla-Medium'),
+    semibold: STACK('Karla-SemiBold'),
+    bold: STACK('Karla-Bold'),
   },
 } as const;
 

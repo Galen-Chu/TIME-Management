@@ -16,7 +16,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import i18n from '../i18n';
@@ -42,6 +42,19 @@ export default function RootLayout() {
   useEffect(() => {
     if (hydrated && language) void i18n.changeLanguage(language);
   }, [hydrated, language]);
+
+  // web 端注入 Noto Sans TC(繁中缺字回落;見 theme 字型堆疊說明)
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const id = 'noto-sans-tc';
+    if (document.getElementById(id)) return;
+    const link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href =
+      'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap';
+    document.head.appendChild(link);
+  }, []);
 
   useEffect(() => {
     if (fontsLoaded && hydrated) void SplashScreen.hideAsync();

@@ -14,8 +14,10 @@ import { MOCK_NOW, type MockEvent } from '../../mock/today';
 import { categoryColor, clock, color, font } from '../../theme';
 
 const R = clock.diameter / 2;
-const STROKE = (clock.diameter - clock.innerDiameter) / 2 + 6; // 環厚
-const RING_R = clock.innerDiameter / 2 + STROKE / 2 - 3;
+const INNER_R = clock.innerDiameter / 2; // 85
+// 環帶幾何:外緣不得超過 SVG 畫布半徑(125),否則左右上下會被裁平
+const STROKE = 36;
+const RING_R = INNER_R + 18; // 103;外緣 103+18=121 ≤ 125,內緣 85 = 內圈相接
 
 function polar(cx: number, cy: number, r: number, deg: number) {
   const rad = ((deg - 90) * Math.PI) / 180;
@@ -72,7 +74,7 @@ export function ClockView({ events }: { events: MockEvent[] }) {
           <Circle
             cx={R}
             cy={R}
-            r={clock.innerDiameter / 2 + STROKE / 2 - 3}
+            r={RING_R}
             stroke={color.track}
             strokeWidth={STROKE}
             fill="none"
