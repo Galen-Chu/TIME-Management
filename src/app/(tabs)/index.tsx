@@ -10,14 +10,18 @@ import { useRouter } from 'expo-router';
 
 import { BlocksView } from '../../components/today/blocks-view';
 import { ClockView } from '../../components/today/clock-view';
+import { DetectionToast } from '../../components/today/detection-toast';
 import { EventSheet } from '../../components/today/event-sheet';
 import { TimelineView } from '../../components/today/timeline-view';
 import { WeekView } from '../../components/today/week-view';
 import { Segmented } from '../../components/ui/segmented';
 import { formatHeaderDate } from '../../i18n/format';
+import { nowHours, type Event } from '../../domain/events';
+import type { CategoryKey } from '../../domain/categories';
+import { smartTick } from '../../services/smart-tick';
 import { useTodayStore } from '../../state/todayStore';
+import { useSettings } from '../../state/settings';
 import { color, font, spacing } from '../../theme';
-import type { Event } from '../../domain/events';
 
 type DayWeek = 'day' | 'week';
 type DayStyle = 'linear' | 'clock' | 'blocks';
@@ -25,18 +29,64 @@ type DayStyle = 'linear' | 'clock' | 'blocks';
 export default function TodayScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { date, events, weekEvents, load } = useTodayStore();
+  const { date, events, weekEvents, routines, schedules, load, createEvent } = useTodayStore();
+  const settings = useSettings((s) => s.settings);
 
   const [dayWeek, setDayWeek] = useState<DayWeek>('day');
   const [style, setStyle] = useState<DayStyle>('linear');
   const [selected, setSelected] = useState<Event | null>(null);
   const [creating, setCreating] = useState<{ start: number; end: number } | null>(null);
+  const [detection, setDetection] = useState<{
+    place: string; minutes: number; categoryGuess: CategoryKey;
+    eventStart: number; eventEnd: number;
+  } | null>(null);
+
+  // Smart tick(Phase 4):排程到點 → 待確認事件 + 規則式預測(每 5 分鐘)
+  useEffect(() => {
+    const tick = () => {
+      const hour = nowHours();
+      const result = smartTick(date, hour, schedules, events, routines, weekEvents, {
+        sensitivity: settings.sensitivity,
+        sleepStart: settings.sleepStart,
+        sleepEnd: settings.sleepEnd,
+        flexEnabled: settings.flexEnabled,
+        irregularMode: settings.irregularMode,
+        leadTime: settings.leadTime,
+      });
+      result.scheduleEvents.forEach((e) => {
+        void createEvent({
+          start: e.start, end: e.end, category: e.category,
+          label: e.label, predicted: true, source: 'predicted',
+        });
+      });
+    };
+    tick();
+    const interval = setInterval(tick, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [date, schedules, events, routines, weekEvents, settings, createEvent]);
 
   const headerDate = formatHeaderDate(new Date(`${date}T00:00:00`), 'zh-TW');
   const closeSheet = () => {
     setSelected(null);
     setCreating(null);
   };
+
+  // Phase 4 模擬:10 秒後觸發一次偵測 Toast 示範(native 由 expo-location 驅動)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const hour = nowHours();
+      if (hour > settings.sleepEnd && hour < settings.sleepStart) {
+        setDetection({
+          place: '示範地點 · 內湖辦公室',
+          minutes: 45,
+          categoryGuess: 'work',
+          eventStart: Math.round((hour - 0.75) * 4) / 4,
+          eventEnd: Math.round(hour * 4) / 4,
+        });
+      }
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [settings.sleepStart, settings.sleepEnd]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -106,6 +156,17 @@ export default function TodayScreen() {
       </ScrollView>
 
       <EventSheet event={selected} creating={creating} onClose={closeSheet} />
+
+      {/* 偵測通知(Phase 4 模擬:10 秒後觸發一次示範) */}
+      <View style={styles.toastOverlay} pointerEvents={detection ? 'auto' : 'none'}>
+        <DetectionToast
+          detection={detection}
+          onDismiss={() => setDetection(null)}
+          onConfirm={(start, end, category, place) => {
+            void createEvent({ start, end, category, label: place, source: 'detected' });
+          }}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -132,4 +193,11 @@ const styles = StyleSheet.create({
   },
   calendarIcon: { fontSize: 14 },
   body: { gap: 12 },
+  toastOverlay: {
+    position: 'absolute',
+    top: 60,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+  },
 });
