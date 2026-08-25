@@ -8,7 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '../ui/card';
 import { EmptyState } from '../ui/empty-state';
 import { categoryLabelKey } from '../../domain/categories';
-import { durationOf, formatRangeSafe, type Event } from './view-helpers';
+import { occursOn } from '../../domain/schedule';
+import { durationOf, type Event } from '../../domain/events';
 import { formatHours, formatRange } from '../../i18n/format';
 import { currentLanguage, useSettings } from '../../state/settings';
 import { useTodayStore } from '../../state/todayStore';
@@ -22,7 +23,7 @@ export function BlocksView({ onSelect }: Props) {
   const { t } = useTranslation();
   const settings = useSettings((s) => s.settings);
   const lang = currentLanguage(settings);
-  const { events, routines, toggleRoutine } = useTodayStore();
+  const { events, routines, schedules, date, toggleRoutine } = useTodayStore();
   const routineLabel = (l: string) => (l.startsWith('today.') ? t(l) : l);
 
   const confirmed = events.filter((e) => !e.predicted);
@@ -31,6 +32,9 @@ export function BlocksView({ onSelect }: Props) {
     .filter((e) => e.category === 'work')
     .reduce((s, e) => s + durationOf(e), 0);
   const doneCount = routines.filter((r) => r.doneToday).length;
+
+  // §A4:今日排程區塊(位置在例行工事之上)
+  const todaySchedules = schedules.filter((s) => occursOn(s, date));
 
   return (
     <View style={styles.wrap}>
@@ -46,6 +50,26 @@ export function BlocksView({ onSelect }: Props) {
           </Text>
         </Card>
       </View>
+
+      {todaySchedules.length > 0 && (
+        <>
+          <SectionTitle>{t('schedule.today')}</SectionTitle>
+          {todaySchedules.map((s) => (
+            <View
+              key={s.id}
+              style={[styles.predictedCard, { borderColor: categoryColor(s.category) }]}
+            >
+              <View style={[styles.catBadge, { backgroundColor: categoryColor(s.category) }]} />
+              <View style={styles.rowMain}>
+                <Text style={[styles.rowTitle, { color: categoryColor(s.category) }]}>{s.title}</Text>
+                <Text style={styles.rowMeta}>
+                  {t('schedule.time')} {formatRange(s.time, s.time + s.durationH)}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </>
+      )}
 
       <SectionTitle>{t('today.routines')}</SectionTitle>
       {routines.length === 0 ? (

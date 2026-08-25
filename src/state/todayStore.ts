@@ -14,6 +14,8 @@ import {
 } from '../domain/events';
 import type { EventRepository } from '../data/repository';
 import type { Routine } from '../data/routine-types';
+import type { ScheduleRepository } from '../data/schedule-repository';
+import type { ScheduleItem } from '../data/schedule-types';
 
 function uid(): string {
   return `e${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
@@ -27,11 +29,16 @@ interface TodayStore {
   date: string;
   events: Event[];
   routines: RoutineVM[];
+  schedules: ScheduleItem[];
   weekEvents: Event[]; // 週檢視(含當週 7 日)
   loading: boolean;
 
   // 測試/啟動注入
-  attach: (events: EventRepository, routinesLegacy: import('../data/repository').RoutineRepository) => void;
+  attach: (
+    events: EventRepository,
+    routinesLegacy: import('../data/repository').RoutineRepository,
+    schedules?: ScheduleRepository
+  ) => void;
 
   load: (date?: string) => Promise<void>;
   createEvent: (input: {
@@ -46,10 +53,15 @@ interface TodayStore {
   confirmEvent: (id: string) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   toggleRoutine: (id: string) => Promise<void>;
+  addRoutine: (input: { label: string; timeHint: string }) => Promise<void>;
+  removeRoutine: (id: string) => Promise<void>;
+  saveSchedule: (item: ScheduleItem) => Promise<void>;
+  deleteSchedule: (id: string) => Promise<void>;
 }
 
 let repo: EventRepository | null = null;
 let routineRepo: import('../data/repository').RoutineRepository | null = null;
+let scheduleRepo: ScheduleRepository | null = null;
 
 /** 例行工事跨日重算(ARCHITECTURE streak 規則;Phase 2 簡化:昨日未完成歸零) */
 function recalcStreak(r: Routine, today: string): Routine {
@@ -63,22 +75,25 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
   date: toDateKey(new Date()),
   events: [],
   routines: [],
+  schedules: [],
   weekEvents: [],
   loading: false,
 
-  attach: (events, routinesLegacy) => {
+  attach: (events, routinesLegacy, schedules) => {
     repo = events;
     routineRepo = routinesLegacy;
+    scheduleRepo = schedules ?? null;
   },
 
   load: async (date) => {
     const d = date ?? get().date;
     if (!repo || !routineRepo) return;
     set({ loading: true, date: d });
-    const [events, weekEvents, routinesRaw] = await Promise.all([
+    const [events, weekEvents, routinesRaw, schedulesRaw] = await Promise.all([
       repo.listByDate(d),
       repo.listRange(shiftDate(d, -(weekdayIndex(d) - 1)), shiftDate(d, 7 - weekdayIndex(d))),
       routineRepo.list(),
+      scheduleRepo ? scheduleRepo.list() : Promise.resolve([]),
     ]);
     const routines: RoutineVM[] = (routinesRaw.length
       ? routinesRaw
@@ -87,7 +102,7 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
       const recalced = recalcStreak(r, d);
       return { ...recalced, doneToday: recalced.doneDate === d };
     });
-    set({ events, weekEvents, routines, loading: false });
+    set({ events, weekEvents, routines, schedules: schedulesRaw, loading: false });
   },
 
   createEvent: async (input) => {
@@ -156,7 +171,48 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
       ),
     }));
   },
+
+  addRoutine: async (input) => {
+    if (!routineRepo) return;
+    await routineRepo.insert({
+      id: uid(),
+      label: input.label,
+      timeHint: input.timeHint,
+      streak: 0,
+      doneDate: null,
+    });
+    await get().load();
+  },
+
+  removeRoutine: async (id) => {
+    if (!routineRepo) return;
+    await routineRepo.remove(id);
+    set((s) => ({ routines: s.routines.filter((x) => x.id !== id) }));
+  },
+
+  saveSchedule: async (item) => {
+    if (!scheduleRepo) return;
+    const exists = get().schedules.some((s) => s.id === item.id);
+    if (exists) {
+      await scheduleRepo.update(item);
+    } else {
+      await scheduleRepo.insert(item);
+    }
+    await get().load();
+  },
+
+  deleteSchedule: async (id) => {
+    if (!scheduleRepo) return;
+    await scheduleRepo.remove(id);
+    set((s) => ({ schedules: s.schedules.filter((x) => x.id !== id) }));
+  },
 }));
+
+// 走查/debug 用:暴露 store 到 window(web only)
+import { Platform } from 'react-native';
+if (Platform.OS === 'web' && typeof window !== 'undefined') {
+  (window as unknown as Record<string, unknown>).__timecareStore = useTodayStore;
+}
 
 /** 週一=1 … 週日=7(date 所在週) */
 function weekdayIndex(date: string): number {
@@ -177,4 +233,5 @@ function defaultRoutines(): Routine[] {
 export function __resetForTest() {
   repo = null;
   routineRepo = null;
+  scheduleRepo = null;
 }
