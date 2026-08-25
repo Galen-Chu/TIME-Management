@@ -129,20 +129,27 @@ export default function TodayScreen() {
                 { value: 'blocks', label: t('today.style.blocks') },
               ]}
             />
+            {/* 三視圖永遠掛載、只切換 display——避免 RN-web 在多次 store
+                更新後條件渲染(mount/unmount)不觸發 re-render 的已知問題。
+                display:none 在 RN-native 與 RN-web 均支援。 */}
             <View style={styles.body}>
-              {style === 'linear' && (
+              <View style={[styles.viewSlot, style !== 'linear' && styles.viewHidden]}>
                 <TimelineView
                   events={events}
                   onSelect={setSelected}
                   onCreate={(start) => setCreating({ start, end: start + 1 })}
                 />
-              )}
-              {style === 'clock' && <ClockView events={events} />}
-              {style === 'blocks' && <BlocksView onSelect={setSelected} />}
+              </View>
+              <View style={[styles.viewSlot, style !== 'clock' && styles.viewHidden]}>
+                <ClockView events={events} />
+              </View>
+              <View style={[styles.viewSlot, style !== 'blocks' && styles.viewHidden]}>
+                <BlocksView onSelect={setSelected} />
+              </View>
             </View>
           </>
         ) : (
-          <View style={styles.body}>
+          <View style={styles.body} key="week-view">
             <WeekView
               weekEvents={weekEvents}
               date={date}
@@ -200,4 +207,6 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 100,
   },
+  viewSlot: { flex: 1 },
+  viewHidden: { display: 'none' },
 });

@@ -10,7 +10,8 @@ TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。目前 repo �
 - **Phase 2 已驗收合併(aadcdd9)**:SQLite(`db.native.ts` 平台檔)/InMemory(`db.ts` web)Repository、`domain/events` 純函式(重疊/跨午夜/合併/幾何)、todayStore CRUD+確認預測+streak、三檢視+週檢視接真資料、事件表單三模式(新增/確認/編輯)、點空白新增、長按進該日、空狀態。36 測試全綠;web CRUD 走查 9/9(`scripts/phase2-walkthrough.py`)
 - 常用指令:`npm run lint` / `npm test` / `npx tsc --noEmit` / `npx expo start --web`
 - 已知 web 限制:執行期分頁切換用直達 URL;資料層 web 走 InMemory(不持久化),native 走 SQLite
-- **Phase 3/4 已驗收合併(7745db6/db2a22a)**:prediction(規則式,敏感度門檻+彈性+非規律)、notification(leadTime/免打擾/排程到點)、detection(停留判定+Toast 流程)、smartTick 整合;86 測試全綠\n- **Phase 5 完成(2026-08-25,分支 feat/phase5-polish,待驗收):語言偵測 fallback 修正(zh-TW)、字體總體驗收(Noto Sans TC 取代 M PLUS 為主字體)、雙語 E2E**
+- **Phase 3/4 已驗收合併(7745db6/db2a22a)**:prediction(規則式,敏感度門檻+彈性+非規律)、notification(leadTime/免打擾/排程到點)、detection(停留判定+Toast 流程)、smartTick 整合;86 測試全綠\n- **Phase 0-5 全部完成並驗收合併(最終 merge 0b94e0a)**
+- **Phase 6 完整驗收(進行中)**:測試計畫見 docs/ACCEPTANCE.md(5 情境+86 回歸+雙語 E2E;方案 C=獨立驗收文件)
 
 ## 文件地圖
 
@@ -21,7 +22,8 @@ TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。目前 repo �
 | `docs/DESIGN-SPEC.md` | 設計 token(色彩/字體/元件/動效)+ tokens.json |
 | `docs/DESIGN-ADDENDUM.md` | 補充設計:排程管理 §A、空狀態 §B、語言切換 §C |
 | `docs/I18N.md` | 英中雙語規劃、字串對照樣張、QA 檢查清單 |
-| `docs/ROADMAP.md` | Phase 0–5 階段計畫與驗收檢查點 |
+| docs/ROADMAP.md | Phase 0–6 階段計畫與驗收檢查點 |
+| docs/ACCEPTANCE.md | Phase 6 完整驗收測試計畫(5 情境+86 回歸+E2E) |
 
 設計原型(互動規格最終依據):Claude Design 專案 `63891dbe-d2bd-46bc-b064-816c5dfb08f3` 的 `TimeCare.dc.html`——需專案擁有者權限,不在 repo 內;檔案與文件不一致時**以原型為互動依據、文件集為規格依據**,先修文件再修程式。
 
