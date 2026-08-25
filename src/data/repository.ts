@@ -15,7 +15,9 @@ export interface EventRepository {
 
 export interface RoutineRepository {
   list(): Promise<Routine[]>;
+  insert(routine: Routine): Promise<void>;
   update(routine: Routine): Promise<void>;
+  remove(id: string): Promise<void>;
 }
 
 /** 記憶體實作(Jest 與 web 預覽;不持久化) */
@@ -55,8 +57,16 @@ export class InMemoryRoutineRepository implements RoutineRepository {
     return this.items.map((r) => ({ ...r }));
   }
 
+  async insert(routine: Routine): Promise<void> {
+    this.items.push({ ...routine });
+  }
+
   async update(routine: Routine): Promise<void> {
     const i = this.items.findIndex((r) => r.id === routine.id);
     if (i >= 0) this.items[i] = { ...routine };
+  }
+
+  async remove(id: string): Promise<void> {
+    this.items = this.items.filter((r) => r.id !== id);
   }
 }

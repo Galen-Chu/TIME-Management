@@ -5,9 +5,12 @@
  * 導覽走導覽器自身 navigation.navigate(含 tabPress 事件),確保狀態同步。
  */
 import { Tabs } from 'expo-router';
+import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { createRepositories } from '../../data/db';
+import { useTodayStore } from '../../state/todayStore';
 import { color, font } from '../../theme';
 
 const TABS: { name: string; key: string }[] = [
@@ -19,6 +22,16 @@ const TABS: { name: string; key: string }[] = [
 
 export default function TabsLayout() {
   const { t } = useTranslation();
+
+  // Repository 初始化(所有分頁共用——統計/排程直達 URL 時也要有資料)
+  useEffect(() => {
+    (async () => {
+      const repos = await createRepositories();
+      useTodayStore.getState().attach(repos.events, repos.routines, repos.schedules);
+      await useTodayStore.getState().load();
+    })();
+  }, []);
+
   return (
     <Tabs
       tabBar={(props) => (
