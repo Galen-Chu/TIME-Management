@@ -9,14 +9,15 @@ import {
   useFonts,
 } from '@expo-google-fonts/karla';
 import {
-  MPLUSRounded1c_500Medium,
-  MPLUSRounded1c_700Bold,
-} from '@expo-google-fonts/m-plus-rounded-1c';
+  NotoSansTC_500Medium,
+  NotoSansTC_600SemiBold,
+  NotoSansTC_700Bold,
+} from '@expo-google-fonts/noto-sans-tc';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import i18n from '../i18n';
@@ -30,8 +31,9 @@ export default function RootLayout() {
   const language = useSettings((s) => s.settings.language);
 
   const [fontsLoaded] = useFonts({
-    'MPLUSRounded1c-Medium': MPLUSRounded1c_500Medium,
-    'MPLUSRounded1c-Bold': MPLUSRounded1c_700Bold,
+    'NotoSansTC-Medium': NotoSansTC_500Medium,
+    'NotoSansTC-SemiBold': NotoSansTC_600SemiBold,
+    'NotoSansTC-Bold': NotoSansTC_700Bold,
     'Karla-Regular': Karla_400Regular,
     'Karla-Medium': Karla_500Medium,
     'Karla-SemiBold': Karla_600SemiBold,
@@ -43,18 +45,7 @@ export default function RootLayout() {
     if (hydrated && language) void i18n.changeLanguage(language);
   }, [hydrated, language]);
 
-  // web 端注入 Noto Sans TC(繁中缺字回落;見 theme 字型堆疊說明)
-  useEffect(() => {
-    if (Platform.OS !== 'web') return;
-    const id = 'noto-sans-tc';
-    if (document.getElementById(id)) return;
-    const link = document.createElement('link');
-    link.id = id;
-    link.rel = 'stylesheet';
-    link.href =
-      'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap';
-    document.head.appendChild(link);
-  }, []);
+  // web 端已由 @expo-google-fonts/noto-sans-tc 套件直接載入,無需額外注入
 
   useEffect(() => {
     if (fontsLoaded && hydrated) void SplashScreen.hideAsync();

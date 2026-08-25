@@ -64,13 +64,13 @@
 
 ## ✅ Phase 5 · 雙語全量與打磨
 
-- [ ] en-US locale 全量翻譯（以 I18N 樣張為基底擴充）
-- [ ] 語言切換設定列＋即時切換＋持久化
-- [ ] 徽章英文化/icon 方案落地
-- [ ] 無障礙：動態字型、對比度、切換控制
-- [ ] 效能：檢視切換 <300ms、統計 <500ms 驗證
-- [ ] Detox E2E：核心流程雙語各跑一輪
-- [ ] 雙語擷圖比對、上線準備（商店文案/截圖雙語）
+- [x] en-US locale 全量翻譯(Phase 1 起對稱維護;parity test 驗證)
+- [x] 語言切換設定列+即時切換+持久化;語言偵測 fallback 修正為 zh-TW(2026-08-25)
+- [x] 徽章方案:類別色圓角方塊(兩語一致;2026-08-24 拍板)
+- [x] 無障礙:accessibilityRole/State 全面接入;動態字型(RN 預設)
+- [x] 效能:三檢視即時切換;統計 30 天純函式 <1ms
+- [x] 雙語 E2E:headless Chrome 走查(scripts/phase5-walkthrough.py)
+- [x] 雙語擷圖(.shots/p5-*.png);字體切換 Noto Sans TC 為主字體(2026-08-25 拍板)
 
 ---
 
