@@ -10,7 +10,7 @@ TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。目前 repo �
 - **Phase 2 已驗收合併(aadcdd9)**:SQLite(`db.native.ts` 平台檔)/InMemory(`db.ts` web)Repository、`domain/events` 純函式(重疊/跨午夜/合併/幾何)、todayStore CRUD+確認預測+streak、三檢視+週檢視接真資料、事件表單三模式(新增/確認/編輯)、點空白新增、長按進該日、空狀態。36 測試全綠;web CRUD 走查 9/9(`scripts/phase2-walkthrough.py`)
 - 常用指令:`npm run lint` / `npm test` / `npx tsc --noEmit` / `npx expo start --web`
 - 已知 web 限制:執行期分頁切換用直達 URL;資料層 web 走 InMemory(不持久化),native 走 SQLite
-- **Phase 3 已驗收合併(7745db6);Phase 4 完成(2026-08-25,分支 feat/phase4-smart,待驗收)**:prediction(規則式,敏感度門檻+彈性+非規律)、notification(leadTime/免打擾/排程到點)、detection(停留判定+Toast 流程)、smartTick 整合;86 測試全綠\n- **下一步:Phase 5**(雙語全量+打磨;含字體總體驗收——使用者 2026-08-25 回饋)
+- **Phase 3/4 已驗收合併(7745db6/db2a22a)**:prediction(規則式,敏感度門檻+彈性+非規律)、notification(leadTime/免打擾/排程到點)、detection(停留判定+Toast 流程)、smartTick 整合;86 測試全綠\n- **Phase 5 完成(2026-08-25,分支 feat/phase5-polish,待驗收):語言偵測 fallback 修正(zh-TW)、字體總體驗收(Noto Sans TC 取代 M PLUS 為主字體)、雙語 E2E**
 
 ## 文件地圖
 

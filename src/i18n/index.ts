@@ -13,14 +13,18 @@ export const SUPPORTED_LANGS = ['zh-TW', 'en-US'] as const;
 export type Language = (typeof SUPPORTED_LANGS)[number];
 export const DEFAULT_LANGUAGE: Language = 'zh-TW';
 
-/** 系統語言對應(非 zh/en 一律 fallback zh-TW) */
+/**
+ * 系統語言對應(FR-I18N:預設 zh-TW)。
+ * 僅系統明確 zh 時跟隨 zh-TW;en 需使用者手動切換(設定列)。
+ * (原版系統 en → en-US 導致英文瀏覽器開啟即英文,違反預設 zh-TW 規格)
+ */
 export function systemLanguage(): Language {
   const locale =
     typeof navigator !== 'undefined' && navigator.language
       ? navigator.language.toLowerCase()
       : '';
-  if (locale.startsWith('en')) return 'en-US';
-  return 'zh-TW';
+  if (locale.startsWith('zh')) return 'zh-TW';
+  return DEFAULT_LANGUAGE; // 非明確 zh 一律 fallback zh-TW
 }
 
 void i18next.use(initReactI18next).init({

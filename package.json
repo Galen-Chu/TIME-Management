@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo-google-fonts/karla": "^0.4.2",
-    "@expo-google-fonts/m-plus-rounded-1c": "^0.4.4",
+    "@expo-google-fonts/noto-sans-tc": "^0.4.3",
     "@expo/ui": "~57.0.12",
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~57.0.15",
