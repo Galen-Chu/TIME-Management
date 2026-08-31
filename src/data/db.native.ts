@@ -1,6 +1,6 @@
 /**
  * expo-sqlite 實作(native 平台檔;web 見 db.ts——Metro 按平台自動選檔)。
- * 開庫 + migration(冪等,PRAGMA user_version)+ Sqlite Repository。
+ * 開庫 + migration(冪等,PRAGMA user_version;邏輯見 migrations.ts)+ Sqlite Repository。
  */
 import * as SQLite from 'expo-sqlite';
 
@@ -9,54 +9,13 @@ import type { EventRepository, RoutineRepository } from './repository';
 import type { Routine } from './routine-types';
 import type { ScheduleItem } from './schedule-types';
 import type { ScheduleRepository } from './schedule-repository';
+import { applyMigrations } from './migrations';
 
 export interface Repositories {
   events: EventRepository;
   routines: RoutineRepository;
   schedules: ScheduleRepository;
 }
-
-const MIGRATIONS: string[] = [
-  // v1:events + routines
-  `
-  CREATE TABLE IF NOT EXISTS events (
-    id TEXT PRIMARY KEY NOT NULL,
-    date TEXT NOT NULL,
-    start REAL NOT NULL,
-    end REAL NOT NULL,
-    category TEXT NOT NULL,
-    label TEXT NOT NULL,
-    predicted INTEGER NOT NULL DEFAULT 0,
-    source TEXT NOT NULL,
-    createdAt INTEGER NOT NULL,
-    updatedAt INTEGER NOT NULL
-  );
-  CREATE INDEX IF NOT EXISTS idx_events_date ON events(date);
-  `,
-  `
-  CREATE TABLE IF NOT EXISTS routines (
-    id TEXT PRIMARY KEY NOT NULL,
-    label TEXT NOT NULL,
-    timeHint TEXT NOT NULL,
-    streak INTEGER NOT NULL DEFAULT 0,
-    doneDate TEXT
-  );
-  `,
-  // v3:schedules(DESIGN-ADDENDUM §A5 結構化欄位)
-  `
-  CREATE TABLE IF NOT EXISTS schedules (
-    id TEXT PRIMARY KEY NOT NULL,
-    title TEXT NOT NULL,
-    category TEXT NOT NULL,
-    recurrence TEXT NOT NULL,
-    weekdays TEXT NOT NULL DEFAULT '[]',
-    date TEXT,
-    time REAL NOT NULL,
-    durationH REAL NOT NULL DEFAULT 1,
-    reminderOn INTEGER NOT NULL DEFAULT 1
-  );
-  `,
-];
 
 interface Row {
   id: string; date: string; start: number; end: number; category: string;
@@ -192,24 +151,12 @@ export class SqliteScheduleRepository implements ScheduleRepository {
 
 let cached: Repositories | null = null;
 
-/** Repository 工廠(native):expo-sqlite 開庫 + migration */
+/** Repository 工廠(native):expo-sqlite 開庫 + migration(冪等) */
 export async function createRepositories(): Promise<Repositories> {
   if (cached) return cached;
   const db = await SQLite.openDatabaseAsync('timecare.db');
   await db.execAsync('PRAGMA journal_mode = WAL;');
-  const current = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
-  const version = current?.user_version ?? 0;
-  for (let v = version; v < MIGRATIONS.length; v++) {
-    await db.execAsync('BEGIN;');
-    try {
-      await db.execAsync(MIGRATIONS[v]);
-      await db.execAsync(`PRAGMA user_version = ${v + 1};`);
-      await db.execAsync('COMMIT;');
-    } catch (err) {
-      await db.execAsync('ROLLBACK;');
-      throw err;
-    }
-  }
+  await applyMigrations(db);
   cached = {
     events: new SqliteEventRepository(db),
     routines: new SqliteRoutineRepository(db),

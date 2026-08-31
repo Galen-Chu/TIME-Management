@@ -84,6 +84,7 @@ export function BlocksView({ onSelect }: Props) {
           <Pressable
             key={r.id}
             accessibilityRole="checkbox"
+            accessibilityLabel={routineLabel(r.label)}
             accessibilityState={{ checked: r.doneToday }}
             onPress={() => toggleRoutine(r.id)}
           >
