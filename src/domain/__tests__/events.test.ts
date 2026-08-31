@@ -3,7 +3,6 @@
  */
 import {
   canAdd,
-  crossesMidnight,
   durationOf,
   hoursByCategory,
   isContiguous,

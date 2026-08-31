@@ -23,6 +23,7 @@ export interface Settings {
   notifyStyle: 'gentle' | 'push';
   quietHoursOn: boolean;
   onboardingDone: boolean;
+  seededRoutines: boolean; // 種子例行工事已播種(一次性;防刪光後復活)
 }
 
 interface SettingsStore {
@@ -43,6 +44,7 @@ const DEFAULTS: Settings = {
   notifyStyle: 'gentle',
   quietHoursOn: true,
   onboardingDone: false,
+  seededRoutines: false,
 };
 
 export const useSettings = create<SettingsStore>()(

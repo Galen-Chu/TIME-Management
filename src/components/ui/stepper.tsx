@@ -4,6 +4,7 @@
  * 夾限與環繞(wrap)由呼叫端以領域函式處理(settings.ts 的 clamp/wrap)。
  */
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { color, font } from '../../theme';
 
@@ -16,11 +17,12 @@ interface Props {
 }
 
 export function Stepper({ value, onDecrement, onIncrement, minLabel = '−', plusLabel = '＋' }: Props) {
+  const { t } = useTranslation();
   return (
     <View style={styles.row}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="decrement"
+        accessibilityLabel={t('common.decrement')}
         onPress={onDecrement}
         style={styles.button}
       >
@@ -31,7 +33,7 @@ export function Stepper({ value, onDecrement, onIncrement, minLabel = '−', plu
       </View>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="increment"
+        accessibilityLabel={t('common.increment')}
         onPress={onIncrement}
         style={styles.button}
       >

@@ -1,7 +1,7 @@
 /**
- * 偵測服務測試:距離、停留判定(45 分鐘門檻)、Toast 參數轉換。
+ * 偵測服務測試:距離、停留判定(45 分鐘門檻)。
  */
-import { detectDwell, distanceM, dwellToToastParams } from '../detection';
+import { detectDwell, distanceM } from '../detection';
 
 describe('distanceM', () => {
   it('同一點 = 0', () => {
@@ -45,23 +45,5 @@ describe('detectDwell(45 分鐘門檻)', () => {
 
   it('單點 → null', () => {
     expect(detectDwell([{ ...base, timestamp: 0 }], 'x', 'work')).toBeNull();
-  });
-});
-
-describe('dwellToToastParams', () => {
-  it('時間轉 0–24(步階 0.25)', () => {
-    const c = {
-      placeName: '內湖辦公室',
-      minutes: 45,
-      categoryGuess: 'work' as const,
-      startTime: Date.parse('2026-08-25T09:10:00'),
-      endTime: Date.parse('2026-08-25T09:55:00'),
-    };
-    const p = dwellToToastParams(c);
-    expect(p.place).toBe('內湖辦公室');
-    expect(p.minutes).toBe(45);
-    expect(p.activityKey).toBe('toast.activity.work');
-    expect(p.category).toBe('work');
-    expect(p.eventStart).toBe(9.25); // 09:15 → 9.25(snap to 0.25)
   });
 });

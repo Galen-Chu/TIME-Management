@@ -9,8 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '../../components/ui/card';
 import { Segmented } from '../../components/ui/segmented';
 import { categoryLabelKey, CATEGORY_KEYS } from '../../domain/categories';
+import { weekdayIndex } from '../../domain/events';
 import { computeRangeStats, monthRange, weekRange, workTrend, type RangeStats } from '../../domain/stats';
-import { formatHours, formatPercent } from '../../i18n/format';
+import { formatHours } from '../../i18n/format';
 import { currentLanguage, useSettings } from '../../state/settings';
 import { useTodayStore } from '../../state/todayStore';
 import { categoryColor, color, font } from '../../theme';
@@ -21,7 +22,7 @@ export default function StatsScreen() {
   const { t } = useTranslation();
   const settings = useSettings((s) => s.settings);
   const lang = currentLanguage(settings);
-  const { date, weekEvents, schedules } = useTodayStore();
+  const { date, weekEvents } = useTodayStore();
   const [range, setRange] = useState<Range>('week');
   const [stats, setStats] = useState<RangeStats | null>(null);
   const [trend, setTrend] = useState<{ diffHours: number } | null>(null);
@@ -49,8 +50,6 @@ export default function StatsScreen() {
     : t('empty.stats.title');
 
   const stackedDays = range === 'week' ? stats.perDay : stats.perDay.slice(-7);
-  const todayWd = new Date(`${date}T00:00:00`).getDay();
-  const todayDow = todayWd === 0 ? 7 : todayWd;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -119,8 +118,7 @@ export default function StatsScreen() {
           <View style={styles.stackRow}>
             {stackedDays.map((d) => {
               const total = Object.values(d.hours).reduce((s, v) => s + (v ?? 0), 0);
-              const dow = new Date(`${d.date}T00:00:00`).getDay();
-              const dowIdx = dow === 0 ? 7 : dow;
+              const dowIdx = weekdayIndex(d.date);
               return (
                 <View key={d.date} style={styles.stackCol}>
                   <View style={styles.stackBar}>

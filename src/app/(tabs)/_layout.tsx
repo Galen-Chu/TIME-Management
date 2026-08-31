@@ -28,6 +28,7 @@ export default function TabsLayout() {
     (async () => {
       const repos = await createRepositories();
       useTodayStore.getState().attach(repos.events, repos.routines, repos.schedules);
+      await useTodayStore.getState().ensureSeeded();
       await useTodayStore.getState().load();
     })();
   }, []);

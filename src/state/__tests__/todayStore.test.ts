@@ -4,6 +4,7 @@
 import { InMemoryEventRepository, InMemoryRoutineRepository } from '../../data/repository';
 import type { Routine } from '../../data/routine-types';
 import { __resetForTest, useTodayStore } from '../todayStore';
+import { useSettings } from '../settings';
 
 const TODAY = '2026-08-24';
 
@@ -92,5 +93,36 @@ describe('例行工事 streak', () => {
     const r = useTodayStore.getState().routines.find((x) => x.id === 'r2');
     expect(r?.streak).toBe(0);
     expect(r?.doneToday).toBe(false);
+  });
+});
+
+describe('種子例行工事(一次性播種;回歸:原先不寫入 repo,streak 重載即還原)', () => {
+  it('空 repo + 未播種 → 寫入 3 條種子;勾選後跨 load() 持久保留', async () => {
+    __resetForTest();
+    useSettings.setState((s) => ({ settings: { ...s.settings, seededRoutines: false } }));
+    const routines = new InMemoryRoutineRepository();
+    useTodayStore.getState().attach(new InMemoryEventRepository(), routines);
+    await useTodayStore.getState().ensureSeeded();
+    expect(await routines.list()).toHaveLength(3);
+
+    useTodayStore.setState({ date: TODAY, events: [], routines: [], weekEvents: [] });
+    await useTodayStore.getState().load(TODAY);
+    await useTodayStore.getState().toggleRoutine('seed-r1');
+    await useTodayStore.getState().load(TODAY);
+    const r = useTodayStore.getState().routines.find((x) => x.id === 'seed-r1');
+    expect(r?.streak).toBe(1);
+    expect(r?.doneToday).toBe(true);
+  });
+
+  it('旗標已設 + 使用者刪光 → 不再復活(load 顯示空狀態)', async () => {
+    __resetForTest();
+    useSettings.setState((s) => ({ settings: { ...s.settings, seededRoutines: true } }));
+    const routines = new InMemoryRoutineRepository();
+    useTodayStore.getState().attach(new InMemoryEventRepository(), routines);
+    await useTodayStore.getState().ensureSeeded();
+    expect(await routines.list()).toHaveLength(0);
+    useTodayStore.setState({ date: TODAY, events: [], routines: [], weekEvents: [] });
+    await useTodayStore.getState().load(TODAY);
+    expect(useTodayStore.getState().routines).toHaveLength(0);
   });
 });

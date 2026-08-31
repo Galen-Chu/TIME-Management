@@ -5,8 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { CATEGORY_KEYS } from '../../domain/categories';
-import { hoursByCategory, shiftDate, type Event } from '../../domain/events';
-import { currentLanguage, useSettings } from '../../state/settings';
+import { hoursByCategory, shiftDate, weekdayIndex, type Event } from '../../domain/events';
 import { categoryColor, color, font } from '../../theme';
 
 const ORDERED = [1, 2, 3, 4, 5, 6, 0];
@@ -21,9 +20,7 @@ export function WeekView({ weekEvents, date, onPickDate }: Props) {
   const { t } = useTranslation();
 
   // 週一為首
-  const wd = new Date(`${date}T00:00:00`).getDay();
-  const idx = wd === 0 ? 7 : wd;
-  const weekStart = shiftDate(date, -(idx - 1));
+  const weekStart = shiftDate(date, -(weekdayIndex(date) - 1));
 
   return (
     <View style={styles.wrap}>

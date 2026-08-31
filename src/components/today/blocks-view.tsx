@@ -125,7 +125,7 @@ export function BlocksView({ onSelect }: Props) {
                 <View style={[styles.catBadge, { backgroundColor: categoryColor(e.category) }]} />
                 <View style={styles.rowMain}>
                   <Text style={[styles.rowTitle, { color: categoryColor(e.category) }]}>
-                    {e.label}
+                    {e.label || t(categoryLabelKey(e.category))}
                   </Text>
                   <Text style={styles.rowMeta}>{formatRange(e.start, e.end)}</Text>
                 </View>

@@ -3,7 +3,6 @@
  * 「查看並確認」開事件表單 /「稍後再說」關閉。Phase 4:由 detection 服務驅動。
  */
 import { useTranslation } from 'react-i18next';
-import { useTodayStore } from '../../state/todayStore';
 import { Toast } from '../ui/toast';
 import type { CategoryKey } from '../../domain/categories';
 

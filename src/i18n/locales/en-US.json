@@ -6,7 +6,10 @@
     "next": "Continue",
     "start": "Get Started",
     "skip": "Skip",
-    "save": "Save"
+    "save": "Save",
+    "close": "Close",
+    "decrement": "Decrease",
+    "increment": "Increase"
   },
   "tabs": {
     "today": "Today",
@@ -61,7 +64,9 @@
     "weekHint": "Every segment is real logged time. Long-press a day for full details.",
     "currentActivity": "Happening now",
     "legendTotal": "{{n}} h total",
-    "noActivity": "Not logged yet"
+    "noActivity": "Not logged yet",
+    "addEvent": "Add event",
+    "demoPlace": "Demo place · Neihu Office"
   },
   "sheet": {
     "confirmTitle": "What were you doing?",
@@ -75,6 +80,13 @@
     "detect": "You've been at \"{{place}}\" for {{minutes}} min — were you {{activity}}?",
     "view": "View & confirm",
     "activity": { "work": "working" }
+  },
+  "notify": {
+    "push": {
+      "predictedTitle": "Prediction to confirm",
+      "upcomingTitle": "Starting soon",
+      "body": "{{label}} · starts in {{minutes}} min"
+    }
   },
   "stats": {
     "title": "Analytics",

@@ -69,9 +69,9 @@ export function historyModeAt(
   return bestCat ? { category: bestCat, count: bestCount, ratio: bestCount / total } : null;
 }
 
-/** 例行工事的下一個 timeHint(今天尚未完成的) */
-export function nextRoutineTime(routines: Routine[], hour: number): Routine | null {
-  const pending = routines.filter((r) => r.doneDate === null || r.doneDate < '');
+/** 例行工事的下一個 timeHint(今天尚未完成的:doneDate=null 或早於今日) */
+export function nextRoutineTime(routines: Routine[], hour: number, date: string): Routine | null {
+  const pending = routines.filter((r) => r.doneDate === null || r.doneDate < date);
   const upcoming = pending
     .map((r) => {
       const [h, m] = r.timeHint.split(':').map(Number);
@@ -81,27 +81,6 @@ export function nextRoutineTime(routines: Routine[], hour: number): Routine | nu
     .filter((x) => x.t > hour)
     .sort((a, b) => a.t - b.t);
   return upcoming[0]?.r ?? null;
-}
-
-/** 排程到點:生成待確認事件(§A4) */
-export function scheduleToEvent(
-  schedule: { id: string; title: string; category: CategoryKey; time: number; durationH: number },
-  date: string
-): { event: Omit<Event, 'createdAt' | 'updatedAt'>; createdAt: number } {
-  const now = Date.now();
-  return {
-    event: {
-      id: `sched-${schedule.id}-${date}`,
-      date,
-      start: snap(schedule.time),
-      end: snap(schedule.time + schedule.durationH),
-      category: schedule.category,
-      label: schedule.title,
-      predicted: true,
-      source: 'predicted',
-    },
-    createdAt: now,
-  };
 }
 
 /** 睡眠時段判定(含跨午夜;±buffer 小時) */
@@ -135,7 +114,7 @@ export function predictNext(input: PredictInput): PredictionResult {
   }
 
   // 2) 例行工事 timeHint(高信心:0.9——使用者自己定的)
-  const nextRoutine = nextRoutineTime(routines, hour);
+  const nextRoutine = nextRoutineTime(routines, hour, date);
   if (nextRoutine) {
     const [h, m] = nextRoutine.timeHint.split(':').map(Number);
     const t = snap(h + m / 60);

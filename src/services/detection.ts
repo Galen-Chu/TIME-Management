@@ -87,26 +87,3 @@ export function detectDwell(
   }
   return null;
 }
-
-/** DwellCandidate → Toast 訊息的 i18n 參數(FR-DTC 範本) */
-export function dwellToToastParams(c: DwellCandidate): {
-  place: string;
-  minutes: number;
-  activityKey: string;
-  /** Toast 建議事件的時間(0–24) */
-  eventStart: number;
-  eventEnd: number;
-  category: CategoryKey;
-} {
-  const d = new Date(c.startTime);
-  const start = d.getHours() + d.getMinutes() / 60;
-  const end = Math.min(new Date(c.endTime).getHours() + new Date(c.endTime).getMinutes() / 60, 24);
-  return {
-    place: c.placeName,
-    minutes: c.minutes,
-    activityKey: `toast.activity.${c.categoryGuess === 'work' ? 'work' : 'other'}`,
-    eventStart: Math.round(start * 4) / 4,
-    eventEnd: Math.max(Math.round(end * 4) / 4, Math.round(start * 4) / 4 + 0.25),
-    category: c.categoryGuess,
-  };
-}

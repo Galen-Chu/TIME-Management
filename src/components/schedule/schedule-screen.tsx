@@ -3,7 +3,7 @@
  * 標題+「＋ 新增」;清單依下次發生排序;列=類別色塊+標題+重複描述+時間+提醒開關;
  * 今天適用的列副行前 accent 點;點列(開關除外)開排程表單(§A3)。
  */
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -22,7 +22,7 @@ import { ScheduleFormSheet } from './schedule-form-sheet';
 export function ScheduleScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { schedules, date, saveSchedule, deleteSchedule } = useTodayStore();
+  const { schedules, date, saveSchedule } = useTodayStore();
   const [editing, setEditing] = useState<ScheduleItem | null>(null);
   const [creating, setCreating] = useState(false);
 

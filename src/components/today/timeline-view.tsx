@@ -4,23 +4,26 @@
  * 現在線 = 即時時刻(nowHours)。點事件塊 → onSelect;點空白 → onCreate(tapY→小時)。
  */
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { timelineBlocks, nowHours, snap, type Event } from '../../domain/events';
 import { formatClock } from '../../i18n/format';
 import { categoryColor, categoryFaded, color, font, timeline } from '../../theme';
-import { currentLanguage, useSettings } from '../../state/settings';
 
 const H = timeline.pxPerHour;
 
 interface Props {
   events: Event[];
+  /** 即時時刻(由父層 useNow 驅動,現在線才會動) */
+  now?: Date;
   onSelect: (e: Event) => void;
   onCreate: (start: number) => void;
 }
 
-export function TimelineView({ events, onSelect, onCreate }: Props) {
-  const now = nowHours();
-  const nowY = now * H;
+export function TimelineView({ events, now, onSelect, onCreate }: Props) {
+  const { t } = useTranslation();
+  const nowH = nowHours(now);
+  const nowY = nowH * H;
 
   return (
     <View style={styles.wrap}>
@@ -34,13 +37,13 @@ export function TimelineView({ events, onSelect, onCreate }: Props) {
 
         {/* 點空白新增:覆蓋整軸的下層按壓層 */}
         <Pressable
-          accessibilityLabel="add event"
+          accessibilityLabel={t('today.addEvent')}
           style={[styles.tapLayer, { height: 24 * H }]}
           onPress={(e) => {
             const n = e.nativeEvent as { locationY?: number; offsetY?: number; layerY?: number; pageY?: number };
             // RN-native 提供 locationY;RN-web 提供 offsetY/layerY
             const y = n.locationY ?? n.offsetY ?? n.layerY;
-            const hour = y != null && y >= 0 ? snap(y / H) : snap(nowHours());
+            const hour = y != null && y >= 0 ? snap(y / H) : snap(nowH);
             onCreate(hour);
           }}
         />
@@ -54,7 +57,7 @@ export function TimelineView({ events, onSelect, onCreate }: Props) {
         <View style={[styles.now, { top: nowY }]}>
           <View style={styles.nowDot} />
           <View style={styles.nowLine} />
-          <Text style={styles.nowLabel}>{formatClock(now)}</Text>
+          <Text style={styles.nowLabel}>{formatClock(nowH)}</Text>
         </View>
       </View>
     </View>

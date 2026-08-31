@@ -14,8 +14,10 @@ import { Toggle } from '../ui/toggle';
 import { CATEGORY_KEYS, type CategoryKey } from '../../domain/categories';
 import { formatClock } from '../../i18n/format';
 import { clampDuration } from '../../domain/schedule';
+import { wrapSleep } from '../../domain/invariants';
 import { useTodayStore } from '../../state/todayStore';
 import type { ScheduleItem, Recurrence } from '../../data/schedule-types';
+import { uid } from '../../utils/uid';
 import { color, font, radius } from '../../theme';
 
 interface Props {
@@ -61,7 +63,7 @@ export function ScheduleFormSheet({ item, creating, onClose }: Props) {
   };
 
   const handleSave = async () => {
-    const id = draft.id || `s${Date.now().toString(36)}`;
+    const id = draft.id || uid('s');
     const weekdaySorted = showWeekdays ? [...draft.weekdays].sort() : [];
     if (draft.recurrence === 'weekly' && weekdaySorted.length === 0) return; // 至少選一日
     await saveSchedule({
@@ -139,8 +141,8 @@ export function ScheduleFormSheet({ item, creating, onClose }: Props) {
             <Text style={styles.fieldLabel}>{t('schedule.time')}</Text>
             <Stepper
               value={formatClock(draft.time)}
-              onDecrement={() => setDraft((d) => ({ ...d, time: (Math.round((d.time - 0.25) * 4) / 4 + 24) % 24 }))}
-              onIncrement={() => setDraft((d) => ({ ...d, time: (Math.round((d.time + 0.25) * 4) / 4) % 24 }))}
+              onDecrement={() => setDraft((d) => ({ ...d, time: wrapSleep(d.time - 0.25) }))}
+              onIncrement={() => setDraft((d) => ({ ...d, time: wrapSleep(d.time + 0.25) }))}
             />
           </View>
           <View style={styles.col}>

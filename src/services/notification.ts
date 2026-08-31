@@ -21,7 +21,14 @@ export function inQuietHours(hour: number): boolean {
 export type NotifyAction =
   | { type: 'none'; reason: 'quiet-hours' | 'not-due' | 'gentle-no-push' }
   | { type: 'in-app-card'; eventId: string }
-  | { type: 'push'; eventId: string; title: string; body: string };
+  | {
+      type: 'push';
+      eventId: string;
+      /** 標題 i18n key(發送端以 t() 解析——NFR-6:服務層不寫死文案) */
+      titleKey: 'notify.push.predictedTitle' | 'notify.push.upcomingTitle';
+      /** t('notify.push.body') 的插值參數 */
+      bodyParams: { label: string; minutes: number };
+    };
 
 interface NotifyCheckInput {
   event: Pick<Event, 'id' | 'start' | 'label' | 'predicted'>;
@@ -56,8 +63,8 @@ export function checkEventReminder(input: NotifyCheckInput): NotifyAction {
   return {
     type: 'push',
     eventId: event.id,
-    title: event.predicted ? '預測待確認' : '即將開始',
-    body: `${event.label} · ${Math.max(0, Math.round(minutesUntil))} 分鐘後開始`,
+    titleKey: event.predicted ? 'notify.push.predictedTitle' : 'notify.push.upcomingTitle',
+    bodyParams: { label: event.label, minutes: Math.max(0, Math.round(minutesUntil)) },
   };
 }
 
