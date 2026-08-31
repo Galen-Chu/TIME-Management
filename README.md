@@ -27,6 +27,7 @@ TimeCare 不是另一個行事曆，而是一支「**全時段覆蓋**」的時�
 | Phase 6 完整驗收 | ✅ 完成（132/132 全綠）→ [ACCEPTANCE.md](./docs/ACCEPTANCE.md) |
 
 > **開發全程完成（2026-08-31 收尾歸檔）**：Phase 0–6 全數驗收合併；覆核 `tsc`／Jest 86 測試／`lint` 全綠。
+> **優化系列完成（同日，五批）**：P0 正確性修復、平台服務接線（定位/通知）、P1 錯誤處理、P2 效能（訂閱粒度/精準更新）、P3 測試補強；測試 86 → **132**，CI（GitHub Actions）全綠。
 
 **本機執行**(Expo SDK 57 / TypeScript strict):
 
@@ -36,7 +37,7 @@ npx expo start --web   # 瀏覽器即時預覽
 npx expo start         # iOS/Android 模擬器(Expo Go)
 ```
 
-品質門檻:`npm run lint`(含 NFR-6 禁寫死字串規則)、`npm test`(**86 測試**)、`npx tsc --noEmit`。
+品質門檻:`npm run lint`(含 NFR-6 禁寫死字串規則)、`npm test`(**132 測試**)、`npm run typecheck`;一次跑全:`npm run verify`(= lint+typecheck+test,同 CI)。
 
 驗收測試:**[docs/ACCEPTANCE.md](./docs/ACCEPTANCE.md)**(5 情境+86 回歸+雙語 E2E)。
 
