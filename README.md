@@ -14,17 +14,19 @@ TimeCare 不是另一個行事曆，而是一支「**全時段覆蓋**」的時�
 
 ---
 
-## 🚧 Status · 目前進度
+## ✅ Status · 專案狀態
 
 | 階段 | 狀態 |
 |---|---|
-| Phase 0 規格凍結與技���棧 | ✅ 完成 |
+| Phase 0 規格凍結與技術棧 | ✅ 完成 |
 | Phase 1 App 骨架與設計系統 | ✅ 完成 |
 | Phase 2 今日核心（資料+事件） | ✅ 完成 |
 | Phase 3 例行工事+統計+排程管理 | ✅ 完成 |
 | Phase 4 智慧功能（預測/偵測/通知） | ✅ 完成 |
 | Phase 5 雙語全量與打磨 | ✅ 完成 |
-| Phase 6 完整驗收 | 🔄 進行中 → [ACCEPTANCE.md](./docs/ACCEPTANCE.md) |
+| Phase 6 完整驗收 | ✅ 完成（132/132 全綠）→ [ACCEPTANCE.md](./docs/ACCEPTANCE.md) |
+
+> **開發全程完成（2026-08-31 收尾歸檔）**：Phase 0–6 全數驗收合併；覆核 `tsc`／Jest 86 測試／`lint` 全綠。
 
 **本機執行**(Expo SDK 57 / TypeScript strict):
 
@@ -37,6 +39,7 @@ npx expo start         # iOS/Android 模擬器(Expo Go)
 品質門檻:`npm run lint`(含 NFR-6 禁寫死字串規則)、`npm test`(**86 測試**)、`npx tsc --noEmit`。
 
 驗收測試:**[docs/ACCEPTANCE.md](./docs/ACCEPTANCE.md)**(5 情境+86 回歸+雙語 E2E)。
+
 ---
 
 ## ✨ Features · 功能總覽
@@ -75,25 +78,27 @@ npx expo start         # iOS/Android 模擬器(Expo Go)
 
 ```
 TIME-Management/
-├── README.md
+├── README.md / CLAUDE.md
 ├── docs/                          # 開發文件（本文件集）
 │   ├── REQUIREMENTS.md            # 功能需求規格（FR/NFR 編號）
 │   ├── ARCHITECTURE.md            # 技術架構與資料模型（技術棧定案）
 │   ├── DESIGN-SPEC.md             # 設計規格（色彩/字體/元件/動效）
 │   ├── DESIGN-ADDENDUM.md         # 補充設計：排程管理/空狀態/語言切換
 │   ├── I18N.md                    # 英中雙語規劃
-│   └── ROADMAP.md                 # 階段式開發路線
-└── app/                           # App 專案（Phase 1 建立，技術棧見 ARCHITECTURE.md）
-    └── src/
-        ├── components/            # Segmented、Stepper、Toggle、EventSheet…
-        ├── screens/               # onboarding / today / stats / adjust / settings
-        ├── navigation/            # 分頁導覽
-        ├── state/                 # 畫面狀態
-        ├── domain/                # 實體與規則
-        ├── data/                  # 資料庫與儲存庫
-        ├── services/              # detection / prediction / notification
-        ├── i18n/                  # locales/zh-TW.json、en-US.json
-        └── theme/                 # 設計 token（對應 DESIGN-SPEC.md）
+│   ├── ROADMAP.md                 # Phase 0–6 階段式開發路線
+│   └── ACCEPTANCE.md              # Phase 6 驗收測試計畫與結果（132/132）
+├── scripts/                       # web／E2E 走查腳本（Python＋Selenium）
+├── assets/                        # 圖示與字體
+└── src/                           # App 原始碼（Expo 專案根即 repo 根）
+    ├── app/                       # expo-router 路由（含 (tabs) 四分頁）
+    ├── components/                # ui／today／schedule 元件（EventSheet、Toast…）
+    ├── state/                     # Zustand 畫面狀態
+    ├── domain/                    # 純函式領域規則（重疊／跨日／統計）
+    ├── data/                      # SQLite（native）／ InMemory（web）儲存庫
+    ├── services/                  # detection / prediction / notification / smartTick
+    ├── i18n/                      # locales/zh-TW.json、en-US.json
+    ├── hooks/ · constants/ · theme/ · mock/
+    └── __tests__（各層內）
 ```
 
 ---
@@ -130,6 +135,7 @@ App 以 **zh-TW 為預設語言**（原型即繁中），**en-US 為完整第二
 | Phase 3 | 例行工事＋統計分析四卡片 | 資料可視化 |
 | Phase 4 | 情境偵測＋規則式預測＋提醒通知 | AI 預測可確認 |
 | Phase 5 | en-US 全量翻譯＋語言切換＋無障礙＋打磨 | 雙語完整版 |
+| Phase 6 | 完整驗收（5 情境＋86 回歸＋雙語 E2E） | 132/132 全綠 ✅ |
 
 各階段細項與驗收標準見 [docs/ROADMAP.md](./docs/ROADMAP.md)。
 
@@ -155,7 +161,8 @@ App 以 **zh-TW 為預設語言**（原型即繁中），**en-US 為完整第二
 | [docs/DESIGN-SPEC.md](./docs/DESIGN-SPEC.md) | 設計原型來源與完整設計 token、元件規格 |
 | [docs/DESIGN-ADDENDUM.md](./docs/DESIGN-ADDENDUM.md) | 補充設計：排程管理畫面、空狀態、語言切換列 |
 | [docs/I18N.md](./docs/I18N.md) | 英中雙語架構、字串對照樣張、品質檢查清單 |
-| [docs/ROADMAP.md](./docs/ROADMAP.md) | Phase 0–5 階段計畫與驗收檢查點 |
+| [docs/ROADMAP.md](./docs/ROADMAP.md) | Phase 0–6 階段計畫與驗收檢查點 |
+| [docs/ACCEPTANCE.md](./docs/ACCEPTANCE.md) | Phase 6 完整驗收測試計畫與執行結果 |
 
 ---
 

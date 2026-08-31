@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。目前 repo 為**開發文件集**(docs only),App 尚未建置;設計原型在 Claude Design(私有,見下方)。
+TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。**開發完成(Phase 0–6 全數驗收,2026-08-31 收尾歸檔)**:Expo SDK 57 App 原始碼於 src/,開發文件集於 docs/;設計原型在 Claude Design(私有,見下方)。
 
-## 專案現況(2026-08-24)
+## 專案現況(2026-08-31 收尾歸檔)
 
 - 7 份開發文件定案並推送(root commit `48ec65b`):README + docs/{REQUIREMENTS, ARCHITECTURE, DESIGN-SPEC, DESIGN-ADDENDUM, I18N, ROADMAP}.md
 - **Phase 0 完成**(含 repo 基礎設施:.gitignore、MIT LICENSE、main+feat/* 分支策略)
@@ -10,8 +10,9 @@ TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。目前 repo �
 - **Phase 2 已驗收合併(aadcdd9)**:SQLite(`db.native.ts` 平台檔)/InMemory(`db.ts` web)Repository、`domain/events` 純函式(重疊/跨午夜/合併/幾何)、todayStore CRUD+確認預測+streak、三檢視+週檢視接真資料、事件表單三模式(新增/確認/編輯)、點空白新增、長按進該日、空狀態。36 測試全綠;web CRUD 走查 9/9(`scripts/phase2-walkthrough.py`)
 - 常用指令:`npm run lint` / `npm test` / `npx tsc --noEmit` / `npx expo start --web`
 - 已知 web 限制:執行期分頁切換用直達 URL;資料層 web 走 InMemory(不持久化),native 走 SQLite
-- **Phase 3/4 已驗收合併(7745db6/db2a22a)**:prediction(規則式,敏感度門檻+彈性+非規律)、notification(leadTime/免打擾/排程到點)、detection(停留判定+Toast 流程)、smartTick 整合;86 測試全綠\n- **Phase 0-5 全部完成並驗收合併(最終 merge 0b94e0a)**
-- **Phase 6 完整驗收(進行中)**:測試計畫見 docs/ACCEPTANCE.md(5 情境+86 回歸+雙語 E2E;方案 C=獨立驗收文件)
+- **Phase 3/4 已驗收合併(7745db6/db2a22a)**:prediction(規則式,敏感度門檻+彈性+非規律)、notification(leadTime/免打擾/排程到點)、detection(停留判定+Toast 流程)、smartTick 整合;86 測試全綠
+- **Phase 0-5 全部完成並驗收合併(最終 merge 0b94e0a)**
+- **Phase 6 完整驗收完成並合併(merge 5384cb0)**:docs/ACCEPTANCE.md 記錄 **132/132 全綠**(5 情境 36 步+86 回歸+雙語 E2E 10 項);2026-08-31 覆核 tsc/Jest 86/lint 全綠——**Phase 0–6 開發全程完成**
 
 ## 文件地圖
 
