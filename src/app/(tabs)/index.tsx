@@ -2,8 +2,8 @@
  * 今天分頁(FR-TOD):標題區 → 日(時間軸/時鐘盤/日誌卡)/週。
  * Phase 2:真資料(todayStore)+ 事件表單 Sheet + 點空白新增 + 週長按進該日。
  */
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -12,6 +12,7 @@ import { BlocksView } from '../../components/today/blocks-view';
 import { ClockView } from '../../components/today/clock-view';
 import { DetectionToast } from '../../components/today/detection-toast';
 import { EventSheet } from '../../components/today/event-sheet';
+import { ReminderToast } from '../../components/today/reminder-toast';
 import { TimelineView } from '../../components/today/timeline-view';
 import { WeekView } from '../../components/today/week-view';
 import { Segmented } from '../../components/ui/segmented';
@@ -19,6 +20,10 @@ import { formatHeaderDate } from '../../i18n/format';
 import { nowHours, snap, type Event } from '../../domain/events';
 import type { CategoryKey } from '../../domain/categories';
 import { smartTick } from '../../services/smart-tick';
+import { checkEventReminder } from '../../services/notification';
+import { dwellToSuggestion } from '../../services/detection';
+import { locationService } from '../../services/location';
+import { notify, type InAppCard } from '../../services/notify';
 import { useNow } from '../../hooks/use-now';
 import { useTodayStore } from '../../state/todayStore';
 import { currentLanguage, useSettings } from '../../state/settings';
@@ -34,7 +39,7 @@ const DEFAULT_EVENT_DURATION_H = 1; // 點空白新增的預設時長
 export default function TodayScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { date, events, weekEvents, routines, schedules, load, createEvent } = useTodayStore();
+  const { date, events, weekEvents, routines, schedules, load, createEvent, applyPredictedEvents } = useTodayStore();
   const settings = useSettings((s) => s.settings);
   const now = useNow(); // 驅動現在線/時鐘指針的即時時刻
 
@@ -46,6 +51,8 @@ export default function TodayScreen() {
     place: string; minutes: number; categoryGuess: CategoryKey;
     eventStart: number; eventEnd: number;
   } | null>(null);
+  const [reminder, setReminder] = useState<InAppCard | null>(null);
+  const notifiedRef = useRef<Set<string>>(new Set()); // 每事件每 session 僅提醒一次
 
   // Smart tick(Phase 4):排程到點 → 待確認事件 + 規則式預測(每 5 分鐘)
   useEffect(() => {
@@ -59,17 +66,30 @@ export default function TodayScreen() {
         irregularMode: settings.irregularMode,
         leadTime: settings.leadTime,
       });
-      result.scheduleEvents.forEach((e) => {
-        void createEvent({
-          start: e.start, end: e.end, category: e.category,
-          label: e.label, predicted: true, source: 'predicted',
+      // 排程到點 + 規則式預測一併落地為待確認事件(applyPredictedEvents 冪等:
+      // 保留 smartTick 的確定性 id,已存在/重疊者略過)
+      void applyPredictedEvents([...result.scheduleEvents, ...result.predictions]);
+
+      // 提醒(FR-SET):leadTime 內將開始的事件,依通知風格派發(每事件每 session 一次)
+      events.forEach((e) => {
+        const action = checkEventReminder({
+          event: e,
+          currentHour: hour,
+          leadTime: settings.leadTime,
+          notifyStyle: settings.notifyStyle,
+          quietHoursOn: settings.quietHoursOn,
+        });
+        if (action.type === 'none' || notifiedRef.current.has(e.id)) return;
+        notifiedRef.current.add(e.id);
+        void notify.dispatchReminder(action, t).then((card) => {
+          if (card) setReminder(card);
         });
       });
     };
     tick();
     const interval = setInterval(tick, TICK_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [date, schedules, events, routines, weekEvents, settings, createEvent]);
+  }, [date, schedules, events, routines, weekEvents, settings, applyPredictedEvents, t]);
 
   const headerDate = formatHeaderDate(new Date(`${date}T00:00:00`), currentLanguage(settings));
   const closeSheet = () => {
@@ -77,22 +97,60 @@ export default function TodayScreen() {
     setCreating(null);
   };
 
-  // Phase 4 模擬:10 秒後觸發一次偵測 Toast 示範(native 由 expo-location 驅動)
+  // 偵測(FR-DTC):native 走 expo-location 前景停留判定;web 維持示範模式
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const hour = nowHours();
-      if (hour > settings.sleepEnd && hour < settings.sleepStart) {
+    if (Platform.OS === 'web') {
+      const timer = setTimeout(() => {
+        const hour = nowHours();
+        if (hour > settings.sleepEnd && hour < settings.sleepStart) {
+          setDetection({
+            place: t('today.demoPlace'),
+            minutes: 45,
+            categoryGuess: 'work',
+            eventStart: snap(hour - 0.75),
+            eventEnd: snap(hour),
+          });
+        }
+      }, DEMO_DETECTION_DELAY_MS);
+      return () => clearTimeout(timer);
+    }
+
+    let active = true;
+    void locationService.start({
+      onDwell: (c) => {
+        if (!active) return;
+        const hour = nowHours();
+        if (hour <= settings.sleepEnd || hour >= settings.sleepStart) return; // 睡眠時段不出卡
+        const s = dwellToSuggestion(c);
         setDetection({
-          place: t('today.demoPlace'),
-          minutes: 45,
-          categoryGuess: 'work',
-          eventStart: snap(hour - 0.75),
-          eventEnd: snap(hour),
+          place: c.placeName,
+          minutes: c.minutes,
+          categoryGuess: c.categoryGuess,
+          eventStart: s.eventStart,
+          eventEnd: s.eventEnd,
         });
-      }
-    }, DEMO_DETECTION_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [t, settings.sleepStart, settings.sleepEnd]);
+        if (settings.notifyStyle === 'push') {
+          void notify.presentDetection(
+            t('notify.detectTitle'),
+            t('toast.detect', {
+              place: c.placeName || t('toast.unknownPlace'),
+              minutes: c.minutes,
+              activity: t(`categories.${c.categoryGuess}`),
+            })
+          );
+        }
+      },
+    });
+    return () => {
+      active = false;
+      locationService.stop();
+    };
+  }, [t, settings.sleepStart, settings.sleepEnd, settings.notifyStyle]);
+
+  // 通知初始化(native:handler 與權限;web no-op)
+  useEffect(() => {
+    void notify.init();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -171,15 +229,29 @@ export default function TodayScreen() {
 
       <EventSheet event={selected} creating={creating} onClose={closeSheet} />
 
-      {/* 偵測通知(Phase 4 模擬:10 秒後觸發一次示範) */}
-      <View style={styles.toastOverlay} pointerEvents={detection ? 'auto' : 'none'}>
-        <DetectionToast
-          detection={detection}
-          onDismiss={() => setDetection(null)}
-          onConfirm={(start, end, category, place) => {
-            void createEvent({ start, end, category, label: place, source: 'detected' });
-          }}
-        />
+      {/* 偵測通知 + 溫和提醒卡(頂部疊層) */}
+      <View style={styles.toastOverlay} pointerEvents={detection || reminder ? 'auto' : 'none'}>
+        <View style={styles.toastStack}>
+          <DetectionToast
+            detection={detection}
+            onDismiss={() => setDetection(null)}
+            onConfirm={(start, end, category, place) => {
+              void createEvent({
+                start, end, category,
+                label: place || t('categories.other'),
+                source: 'detected',
+              });
+            }}
+          />
+          <ReminderToast
+            card={reminder}
+            onView={(eventId) => {
+              const e = events.find((x) => x.id === eventId);
+              if (e) setSelected(e);
+            }}
+            onDismiss={() => setReminder(null)}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -214,6 +286,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 100,
   },
+  toastStack: { gap: 8 },
   viewSlot: { flex: 1 },
   viewHidden: { display: 'none' },
 });

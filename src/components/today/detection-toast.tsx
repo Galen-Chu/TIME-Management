@@ -25,7 +25,7 @@ export function DetectionToast({ detection, onDismiss, onConfirm }: DetectionToa
   if (!detection) return null;
 
   const message = t('toast.detect', {
-    place: detection.place,
+    place: detection.place || t('toast.unknownPlace'),
     minutes: detection.minutes,
     activity: t(`categories.${detection.categoryGuess}`),
   });
@@ -36,7 +36,7 @@ export function DetectionToast({ detection, onDismiss, onConfirm }: DetectionToa
       primaryLabel={t('toast.view')}
       secondaryLabel={t('common.later')}
       onPrimary={() => {
-        onConfirm(detection.eventStart, detection.eventEnd, detection.categoryGuess, detection.place);
+        onConfirm(detection.eventStart, detection.eventEnd, detection.categoryGuess, detection.place || '');
         onDismiss();
       }}
       onSecondary={onDismiss}

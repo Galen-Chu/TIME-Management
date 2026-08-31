@@ -79,9 +79,11 @@
   "toast": {
     "detect": "偵測到你在「{{place}}」停留 {{minutes}} 分鐘 — 是在{{activity}}嗎？",
     "view": "查看並確認",
+    "unknownPlace": "未命名地點",
     "activity": { "work": "工作" }
   },
   "notify": {
+    "detectTitle": "情境偵測",
     "push": {
       "predictedTitle": "預測待確認",
       "upcomingTitle": "即將開始",

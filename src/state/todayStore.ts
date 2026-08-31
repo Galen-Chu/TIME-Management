@@ -50,6 +50,8 @@ interface TodayStore {
     source?: Event['source'];
     predicted?: boolean;
   }) => Promise<boolean>; // false = 重疊或不合法
+  /** 智慧服務產出的待確認事件(smartTick):保留傳入 id 達成冪等,重疊/已存在者略過 */
+  applyPredictedEvents: (items: Array<Omit<Event, 'createdAt' | 'updatedAt'>>) => Promise<void>;
   updateEvent: (id: string, patch: Partial<Pick<Event, 'label' | 'category'>> ) => Promise<void>;
   confirmEvent: (id: string) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
@@ -138,6 +140,24 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
     await repo.insert(event);
     await get().load();
     return true;
+  },
+
+  applyPredictedEvents: async (items) => {
+    if (!repo || items.length === 0) return;
+    const existingIds = new Set(get().events.map((e) => e.id));
+    // 以本地副本累加本批已寫入者,避免同批互相重疊的候選全部通過
+    const taken: Array<Pick<Event, 'start' | 'end' | 'id'>> = [...get().events];
+    const now = Date.now();
+    let inserted = false;
+    for (const e of items) {
+      if (existingIds.has(e.id)) continue;
+      if (!canAdd(e, taken)) continue;
+      await repo.insert({ ...e, createdAt: now, updatedAt: now });
+      taken.push(e);
+      existingIds.add(e.id);
+      inserted = true;
+    }
+    if (inserted) await get().load();
   },
 
   updateEvent: async (id, patch) => {

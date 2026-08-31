@@ -1,7 +1,7 @@
 /**
- * 偵測服務測試:距離、停留判定(45 分鐘門檻)。
+ * 偵測服務測試:距離、停留判定(45 分鐘門檻)、建議事件時間轉換。
  */
-import { detectDwell, distanceM } from '../detection';
+import { detectDwell, distanceM, dwellToSuggestion } from '../detection';
 
 describe('distanceM', () => {
   it('同一點 = 0', () => {
@@ -45,5 +45,30 @@ describe('detectDwell(45 分鐘門檻)', () => {
 
   it('單點 → null', () => {
     expect(detectDwell([{ ...base, timestamp: 0 }], 'x', 'work')).toBeNull();
+  });
+});
+
+describe('dwellToSuggestion(偵測 → 建議事件時間)', () => {
+  it('時間轉 0–24(步階 0.25),時長至少 0.25', () => {
+    const c = {
+      placeName: '內湖辦公室',
+      minutes: 45,
+      categoryGuess: 'work' as const,
+      startTime: Date.parse('2026-08-25T09:10:00'),
+      endTime: Date.parse('2026-08-25T09:55:00'),
+    };
+    expect(dwellToSuggestion(c)).toEqual({ eventStart: 9.25, eventEnd: 10 });
+  });
+
+  it('過短停留夾限為最小時長', () => {
+    const c = {
+      placeName: '',
+      minutes: 45,
+      categoryGuess: 'other' as const,
+      startTime: Date.parse('2026-08-25T09:00:00'),
+      endTime: Date.parse('2026-08-25T09:05:00'),
+    };
+    const s = dwellToSuggestion(c);
+    expect(s.eventEnd - s.eventStart).toBeGreaterThanOrEqual(0.25);
   });
 });

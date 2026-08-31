@@ -20,13 +20,18 @@ export function inQuietHours(hour: number): boolean {
 
 export type NotifyAction =
   | { type: 'none'; reason: 'quiet-hours' | 'not-due' | 'gentle-no-push' }
-  | { type: 'in-app-card'; eventId: string }
+  | {
+      type: 'in-app-card';
+      eventId: string;
+      /** 標題 i18n key(呈現端以 t() 解析——NFR-6:服務層不寫死文案) */
+      titleKey: 'notify.push.predictedTitle' | 'notify.push.upcomingTitle';
+      /** t('notify.push.body') 的插值參數 */
+      bodyParams: { label: string; minutes: number };
+    }
   | {
       type: 'push';
       eventId: string;
-      /** 標題 i18n key(發送端以 t() 解析——NFR-6:服務層不寫死文案) */
       titleKey: 'notify.push.predictedTitle' | 'notify.push.upcomingTitle';
-      /** t('notify.push.body') 的插值參數 */
       bodyParams: { label: string; minutes: number };
     };
 
@@ -53,15 +58,27 @@ export function checkEventReminder(input: NotifyCheckInput): NotifyAction {
 
   // 免打擾:抑制主動推播,僅保留 App 內
   if (quietHoursOn && inQuietHours(currentHour) && notifyStyle === 'push') {
-    return { type: 'in-app-card', eventId: event.id };
+    return card(event, minutesUntil);
   }
 
   if (notifyStyle === 'gentle') {
-    return { type: 'in-app-card', eventId: event.id };
+    return card(event, minutesUntil);
   }
 
   return {
     type: 'push',
+    eventId: event.id,
+    titleKey: event.predicted ? 'notify.push.predictedTitle' : 'notify.push.upcomingTitle',
+    bodyParams: { label: event.label, minutes: Math.max(0, Math.round(minutesUntil)) },
+  };
+}
+
+function card(
+  event: Pick<Event, 'id' | 'label' | 'predicted'>,
+  minutesUntil: number
+): NotifyAction {
+  return {
+    type: 'in-app-card',
     eventId: event.id,
     titleKey: event.predicted ? 'notify.push.predictedTitle' : 'notify.push.upcomingTitle',
     bodyParams: { label: event.label, minutes: Math.max(0, Math.round(minutesUntil)) },
