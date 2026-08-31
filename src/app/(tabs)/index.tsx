@@ -39,7 +39,12 @@ const DEFAULT_EVENT_DURATION_H = 1; // 點空白新增的預設時長
 export default function TodayScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { date, events, weekEvents, routines, schedules, load, createEvent, applyPredictedEvents } = useTodayStore();
+  // P2:selector 訂閱——只訂閱用到的切片,store 其他變動不再重渲染本頁
+  const date = useTodayStore((s) => s.date);
+  const events = useTodayStore((s) => s.events);
+  const weekEvents = useTodayStore((s) => s.weekEvents);
+  const load = useTodayStore((s) => s.load);
+  const createEvent = useTodayStore((s) => s.createEvent);
   const settings = useSettings((s) => s.settings);
   const now = useNow(); // 驅動現在線/時鐘指針的即時時刻
 
@@ -54,34 +59,39 @@ export default function TodayScreen() {
   const [reminder, setReminder] = useState<InAppCard | null>(null);
   const notifiedRef = useRef<Set<string>>(new Set()); // 每事件每 session 僅提醒一次
 
-  // Smart tick(Phase 4):排程到點 → 待確認事件 + 規則式預測(每 5 分鐘)
+  // Smart tick(Phase 4/P2):interval 常駐,tick 內以 getState() 取最新資料——
+  // 不再隨 store 變動拆除重建 effect(原為更新串聯的主要來源)。
+  const tRef = useRef(t);
+  tRef.current = t;
   useEffect(() => {
     const tick = () => {
+      const s = useTodayStore.getState();
+      const st = useSettings.getState().settings;
       const hour = nowHours();
-      const result = smartTick(date, hour, schedules, events, routines, weekEvents, {
-        sensitivity: settings.sensitivity,
-        sleepStart: settings.sleepStart,
-        sleepEnd: settings.sleepEnd,
-        flexEnabled: settings.flexEnabled,
-        irregularMode: settings.irregularMode,
-        leadTime: settings.leadTime,
+      const result = smartTick(s.date, hour, s.schedules, s.events, s.routines, s.weekEvents, {
+        sensitivity: st.sensitivity,
+        sleepStart: st.sleepStart,
+        sleepEnd: st.sleepEnd,
+        flexEnabled: st.flexEnabled,
+        irregularMode: st.irregularMode,
+        leadTime: st.leadTime,
       });
-      // 排程到點 + 規則式預測一併落地為待確認事件(applyPredictedEvents 冪等:
+      // 排程到點 + 規則式預測一併落地(applyPredictedEvents 冪等:
       // 保留 smartTick 的確定性 id,已存在/重疊者略過)
-      void applyPredictedEvents([...result.scheduleEvents, ...result.predictions]);
+      void s.applyPredictedEvents([...result.scheduleEvents, ...result.predictions]);
 
       // 提醒(FR-SET):leadTime 內將開始的事件,依通知風格派發(每事件每 session 一次)
-      events.forEach((e) => {
+      s.events.forEach((e) => {
         const action = checkEventReminder({
           event: e,
           currentHour: hour,
-          leadTime: settings.leadTime,
-          notifyStyle: settings.notifyStyle,
-          quietHoursOn: settings.quietHoursOn,
+          leadTime: st.leadTime,
+          notifyStyle: st.notifyStyle,
+          quietHoursOn: st.quietHoursOn,
         });
         if (action.type === 'none' || notifiedRef.current.has(e.id)) return;
         notifiedRef.current.add(e.id);
-        void notify.dispatchReminder(action, t).then((card) => {
+        void notify.dispatchReminder(action, tRef.current).then((card) => {
           if (card) setReminder(card);
         });
       });
@@ -89,7 +99,9 @@ export default function TodayScreen() {
     tick();
     const interval = setInterval(tick, TICK_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [date, schedules, events, routines, weekEvents, settings, applyPredictedEvents, t]);
+    // date/events 變動(bootstrap 載入完成、切日、新增/確認)即時重跑 tick——冪等且便宜;
+    // settings/routines/schedules 不入依賴,於 tick 內即時讀取。
+  }, [date, events]);
 
   const headerDate = formatHeaderDate(new Date(`${date}T00:00:00`), currentLanguage(settings));
   const closeSheet = () => {

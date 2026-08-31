@@ -41,7 +41,10 @@ function newSchedule(): ScheduleItem {
 
 export function ScheduleFormSheet({ item, creating, onClose }: Props) {
   const { t } = useTranslation();
-  const { saveSchedule, deleteSchedule, date } = useTodayStore();
+  // P2:selector 訂閱
+  const saveSchedule = useTodayStore((s) => s.saveSchedule);
+  const deleteSchedule = useTodayStore((s) => s.deleteSchedule);
+  const date = useTodayStore((s) => s.date);
   const [draft, setDraft] = useState<ScheduleItem>(newSchedule());
 
   useEffect(() => {

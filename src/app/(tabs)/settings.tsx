@@ -14,7 +14,9 @@ import { color, font } from '../../theme';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
-  const { settings, update, setLanguage } = useSettings();
+  const settings = useSettings((s) => s.settings);
+  const update = useSettings((s) => s.update);
+  const setLanguage = useSettings((s) => s.setLanguage);
   const sensDescKey = `settings.sens${settings.sensitivity}Desc` as const;
 
   return (
