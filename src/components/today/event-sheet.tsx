@@ -23,7 +23,11 @@ interface Props {
 
 export function EventSheet({ event, creating, onClose }: Props) {
   const { t } = useTranslation();
-  const { updateEvent, confirmEvent, deleteEvent, createEvent } = useTodayStore();
+  // P2:動作為穩定引用,selector 訂閱不再連帶資料切片
+  const updateEvent = useTodayStore((s) => s.updateEvent);
+  const confirmEvent = useTodayStore((s) => s.confirmEvent);
+  const deleteEvent = useTodayStore((s) => s.deleteEvent);
+  const createEvent = useTodayStore((s) => s.createEvent);
 
   const isCreate = !event && creating != null;
   const isPredicted = event?.predicted ?? false;

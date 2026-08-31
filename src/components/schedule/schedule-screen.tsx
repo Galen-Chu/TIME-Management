@@ -22,7 +22,10 @@ import { ScheduleFormSheet } from './schedule-form-sheet';
 export function ScheduleScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { schedules, date, saveSchedule } = useTodayStore();
+  // P2:selector 訂閱
+  const schedules = useTodayStore((s) => s.schedules);
+  const date = useTodayStore((s) => s.date);
+  const saveSchedule = useTodayStore((s) => s.saveSchedule);
   const [editing, setEditing] = useState<ScheduleItem | null>(null);
   const [creating, setCreating] = useState(false);
 

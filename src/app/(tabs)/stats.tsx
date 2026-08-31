@@ -1,7 +1,7 @@
 /**
  * 統計分析分頁(FR-STA):本週/本月分段 + 四卡片——接 domain 真計算。
  */
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -22,18 +22,20 @@ export default function StatsScreen() {
   const { t } = useTranslation();
   const settings = useSettings((s) => s.settings);
   const lang = currentLanguage(settings);
-  const { date, weekEvents } = useTodayStore();
+  // P2:selector 訂閱 + useMemo 計算(原 useEffect+setState 造成先舊後新雙重渲染)
+  const date = useTodayStore((s) => s.date);
+  const weekEvents = useTodayStore((s) => s.weekEvents);
   const [range, setRange] = useState<Range>('week');
-  const [stats, setStats] = useState<RangeStats | null>(null);
-  const [trend, setTrend] = useState<{ diffHours: number } | null>(null);
 
-  useEffect(() => {
+  const stats: RangeStats = useMemo(() => {
     const r = range === 'week' ? weekRange(date) : monthRange(date);
-    setStats(computeRangeStats(weekEvents, r.from, r.to, range === 'week' ? 7 : 30));
-    setTrend(range === 'week' ? workTrend(weekEvents, weekRange(date), date) : null);
+    return computeRangeStats(weekEvents, r.from, r.to, range === 'week' ? 7 : 30);
   }, [range, date, weekEvents]);
 
-  if (!stats) return null;
+  const trend = useMemo(
+    () => (range === 'week' ? workTrend(weekEvents, weekRange(date), date) : null),
+    [range, date, weekEvents]
+  );
 
   const maxAvg = stats.byCategory[0]?.avgPerDay ?? 1;
   const trendText = trend

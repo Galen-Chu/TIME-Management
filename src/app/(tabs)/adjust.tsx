@@ -14,7 +14,8 @@ import { color, font } from '../../theme';
 
 export default function AdjustScreen() {
   const { t } = useTranslation();
-  const { settings, update } = useSettings();
+  const settings = useSettings((s) => s.settings);
+  const update = useSettings((s) => s.update);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>

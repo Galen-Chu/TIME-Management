@@ -78,6 +78,34 @@ function recalcStreak(r: Routine, today: string): Routine {
   return r;
 }
 
+// ── P2 精準更新輔助:mutation 只改受影響切片,不再全量 load() ──
+
+/** 插入後維持排序(當日事件:start 升序) */
+function withEvent(list: Event[], e: Event): Event[] {
+  return [...list, e].sort((a, b) => a.start - b.start);
+}
+
+/** 插入後維持排序(週陣列:日期+start) */
+function withWeekEvent(list: Event[], e: Event): Event[] {
+  return [...list, e].sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+}
+
+/** date 是否在 anchor 所在週(週一為首) */
+function inWeekOf(date: string, anchor: string): boolean {
+  const idx = weekdayIndex(anchor);
+  const from = shiftDate(anchor, -(idx - 1));
+  const to = shiftDate(anchor, 7 - idx);
+  return date >= from && date <= to;
+}
+
+function replaceEvent(list: Event[], e: Event): Event[] {
+  return list.map((x) => (x.id === e.id ? e : x));
+}
+
+function removeEvent(list: Event[], id: string): Event[] {
+  return list.filter((x) => x.id !== id);
+}
+
 export const useTodayStore = create<TodayStore>((set, get) => ({
   date: toDateKey(new Date()),
   events: [],
@@ -148,7 +176,13 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
         updatedAt: now,
       };
       await repo.insert(event);
-      await get().load();
+      // P2:精準更新——只動 events/weekEvents 切片,不觸發全量 load()
+      set((s) => ({
+        events: withEvent(s.events, event),
+        weekEvents: inWeekOf(event.date, s.date)
+          ? withWeekEvent(s.weekEvents, event)
+          : s.weekEvents,
+      }));
       return true;
     }, false),
 
@@ -159,16 +193,27 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
       // 以本地副本累加本批已寫入者,避免同批互相重疊的候選全部通過
       const taken: Array<Pick<Event, 'start' | 'end' | 'id'>> = [...get().events];
       const now = Date.now();
-      let inserted = false;
+      const added: Event[] = [];
       for (const e of items) {
         if (existingIds.has(e.id)) continue;
         if (!canAdd(e, taken)) continue;
-        await repo.insert({ ...e, createdAt: now, updatedAt: now });
-        taken.push(e);
+        const full = { ...e, createdAt: now, updatedAt: now };
+        await repo.insert(full);
+        taken.push(full);
         existingIds.add(e.id);
-        inserted = true;
+        added.push(full);
       }
-      if (inserted) await get().load();
+      if (added.length > 0) {
+        set((s) => {
+          let events = s.events;
+          let week = s.weekEvents;
+          for (const a of added) {
+            events = withEvent(events, a);
+            if (inWeekOf(a.date, s.date)) week = withWeekEvent(week, a);
+          }
+          return { events, weekEvents: week };
+        });
+      }
     }, undefined),
 
   updateEvent: async (id, patch) =>
@@ -176,8 +221,12 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
       if (!repo) return;
       const e = get().events.find((x) => x.id === id);
       if (!e) return;
-      await repo.update({ ...e, ...patch, updatedAt: Date.now() });
-      await get().load();
+      const next = { ...e, ...patch, updatedAt: Date.now() };
+      await repo.update(next);
+      set((s) => ({
+        events: replaceEvent(s.events, next),
+        weekEvents: replaceEvent(s.weekEvents, next),
+      }));
     }, undefined),
 
   confirmEvent: async (id) =>
@@ -186,15 +235,22 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
       const e = get().events.find((x) => x.id === id);
       if (!e) return;
       // 確認預測 = predicted:false 且不可逆(ARCHITECTURE invariant)
-      await repo.update({ ...e, predicted: false, updatedAt: Date.now() });
-      await get().load();
+      const next = { ...e, predicted: false, updatedAt: Date.now() };
+      await repo.update(next);
+      set((s) => ({
+        events: replaceEvent(s.events, next),
+        weekEvents: replaceEvent(s.weekEvents, next),
+      }));
     }, undefined),
 
   deleteEvent: async (id) =>
     guard(async () => {
       if (!repo) return;
       await repo.remove(id);
-      await get().load();
+      set((s) => ({
+        events: removeEvent(s.events, id),
+        weekEvents: removeEvent(s.weekEvents, id),
+      }));
     }, undefined),
 
   toggleRoutine: async (id) =>
@@ -221,14 +277,16 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
   addRoutine: async (input) =>
     guard(async () => {
       if (!routineRepo) return;
-      await routineRepo.insert({
+      const r: RoutineVM = {
         id: uid('r'),
         label: input.label,
         timeHint: input.timeHint,
         streak: 0,
         doneDate: null,
-      });
-      await get().load();
+        doneToday: false,
+      };
+      await routineRepo.insert(r);
+      set((s) => ({ routines: [...s.routines, r] }));
     }, undefined),
 
   removeRoutine: async (id) =>
@@ -247,7 +305,11 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
       } else {
         await scheduleRepo.insert(item);
       }
-      await get().load();
+      set((s) => ({
+        schedules: exists
+          ? s.schedules.map((x) => (x.id === item.id ? item : x))
+          : [...s.schedules, item],
+      }));
     }, undefined),
 
   deleteSchedule: async (id) =>

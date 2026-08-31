@@ -23,7 +23,12 @@ export function BlocksView({ onSelect }: Props) {
   const { t } = useTranslation();
   const settings = useSettings((s) => s.settings);
   const lang = currentLanguage(settings);
-  const { events, routines, schedules, date, toggleRoutine } = useTodayStore();
+  // P2:selector 訂閱——僅重渲染本檢視實際依賴的切片
+  const events = useTodayStore((s) => s.events);
+  const routines = useTodayStore((s) => s.routines);
+  const schedules = useTodayStore((s) => s.schedules);
+  const date = useTodayStore((s) => s.date);
+  const toggleRoutine = useTodayStore((s) => s.toggleRoutine);
   const routineLabel = (l: string) => (l.startsWith('today.') ? t(l) : l);
 
   const confirmed = events.filter((e) => !e.predicted);
