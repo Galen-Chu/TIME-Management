@@ -37,6 +37,7 @@ export function TimelineView({ events, now, onSelect, onCreate }: Props) {
 
         {/* 點空白新增:覆蓋整軸的下層按壓層 */}
         <Pressable
+          accessibilityRole="button"
           accessibilityLabel={t('today.addEvent')}
           style={[styles.tapLayer, { height: 24 * H }]}
           onPress={(e) => {
@@ -78,6 +79,7 @@ function EventBlock({
   const height = Math.max(block.hours * H - 2, 20);
   return (
     <Pressable
+      accessibilityRole="button"
       accessibilityLabel={event.label}
       onPress={() => onSelect(event)}
       style={[
