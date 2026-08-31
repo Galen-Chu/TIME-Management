@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { ErrorBanner } from '../../components/error-banner';
 import { createRepositories } from '../../data/db';
 import { useTodayStore } from '../../state/todayStore';
 import { color, font } from '../../theme';
@@ -23,18 +24,25 @@ const TABS: { name: string; key: string }[] = [
 export default function TabsLayout() {
   const { t } = useTranslation();
 
-  // Repository 初始化(所有分頁共用——統計/排程直達 URL 時也要有資料)
+  // Repository 初始化(所有分頁共用——統計/排程直達 URL 時也要有資料)。
+  // 失敗(SQLite 開啟/迁移錯誤)不讓 App 白屏:寫入 error 狀態,由橫幅呈現。
   useEffect(() => {
     (async () => {
-      const repos = await createRepositories();
-      useTodayStore.getState().attach(repos.events, repos.routines, repos.schedules);
-      await useTodayStore.getState().ensureSeeded();
-      await useTodayStore.getState().load();
+      try {
+        const repos = await createRepositories();
+        useTodayStore.getState().attach(repos.events, repos.routines, repos.schedules);
+        await useTodayStore.getState().ensureSeeded();
+        await useTodayStore.getState().load();
+      } catch (e) {
+        useTodayStore.setState({ error: e instanceof Error ? e.message : String(e) });
+      }
     })();
   }, []);
 
   return (
-    <Tabs
+    <View style={styles.shell}>
+      <ErrorBanner />
+      <Tabs
       tabBar={(props) => (
         <View style={styles.bar}>
           {TABS.map((tab, i) => {
@@ -72,10 +80,12 @@ export default function TabsLayout() {
       <Tabs.Screen name="adjust" />
       <Tabs.Screen name="settings" />
     </Tabs>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  shell: { flex: 1 },
   bar: {
     flexDirection: 'row',
     backgroundColor: 'rgba(255,255,255,0.9)',

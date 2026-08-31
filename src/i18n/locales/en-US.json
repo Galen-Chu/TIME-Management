@@ -9,7 +9,11 @@
     "save": "Save",
     "close": "Close",
     "decrement": "Decrease",
-    "increment": "Increase"
+    "increment": "Increase",
+    "error": "Something went wrong",
+    "errorSave": "Save failed — some changes may not be stored",
+    "errorBoundaryBody": "The screen hit an unexpected problem. Retry, or restart the app if it keeps happening.",
+    "retry": "Retry"
   },
   "tabs": {
     "today": "Today",

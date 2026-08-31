@@ -1,6 +1,8 @@
 /**
  * 今日核心 store(Zustand):事件 CRUD、確認預測、例行工事 streak。
  * 依賴 Repository 介面(測試注入 InMemory;App 用 createRepositories)。
+ * 資料操作以 guard() 防護:錯誤寫入 error 狀態(UI 顯示橫幅),不外拋
+ * unhandled rejection。
  */
 import { create } from 'zustand';
 
@@ -31,6 +33,7 @@ interface TodayStore {
   schedules: ScheduleItem[];
   weekEvents: Event[]; // 週檢視(含當週 7 日)
   loading: boolean;
+  error: string | null; // 最近一次資料操作錯誤(技術訊息;UI 顯示通用文案)
 
   // 測試/啟動注入
   attach: (
@@ -39,6 +42,7 @@ interface TodayStore {
     schedules?: ScheduleRepository
   ) => void;
 
+  clearError: () => void;
   load: (date?: string) => Promise<void>;
   /** 一次性種子例行工事(僅空 repo 且未播種過;防刪光後復活) */
   ensureSeeded: () => Promise<void>;
@@ -81,6 +85,7 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
   schedules: [],
   weekEvents: [],
   loading: false,
+  error: null,
 
   attach: (events, routinesLegacy, schedules) => {
     repo = events;
@@ -88,156 +93,186 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
     scheduleRepo = schedules ?? null;
   },
 
-  load: async (date) => {
-    const d = date ?? get().date;
-    if (!repo || !routineRepo) return;
-    set({ loading: true, date: d });
-    const [events, weekEvents, routinesRaw, schedulesRaw] = await Promise.all([
-      repo.listByDate(d),
-      repo.listRange(shiftDate(d, -(weekdayIndex(d) - 1)), shiftDate(d, 7 - weekdayIndex(d))),
-      routineRepo.list(),
-      scheduleRepo ? scheduleRepo.list() : Promise.resolve([]),
-    ]);
-    const routines: RoutineVM[] = routinesRaw.map((r) => {
-      const recalced = recalcStreak(r, d);
-      return { ...recalced, doneToday: recalced.doneDate === d };
-    });
-    set({ events, weekEvents, routines, schedules: schedulesRaw, loading: false });
-  },
+  clearError: () => set({ error: null }),
 
-  ensureSeeded: async () => {
-    if (!routineRepo) return;
-    const { settings, update } = useSettings.getState();
-    if (settings.seededRoutines) return;
-    const existing = await routineRepo.list();
-    if (existing.length === 0) {
-      for (const r of defaultRoutines()) {
-        await routineRepo.insert(r);
+  load: async (date) =>
+    guard(async () => {
+      const d = date ?? get().date;
+      if (!repo || !routineRepo) return;
+      set({ loading: true, date: d });
+      const [events, weekEvents, routinesRaw, schedulesRaw] = await Promise.all([
+        repo.listByDate(d),
+        repo.listRange(shiftDate(d, -(weekdayIndex(d) - 1)), shiftDate(d, 7 - weekdayIndex(d))),
+        routineRepo.list(),
+        scheduleRepo ? scheduleRepo.list() : Promise.resolve([]),
+      ]);
+      const routines: RoutineVM[] = routinesRaw.map((r) => {
+        const recalced = recalcStreak(r, d);
+        return { ...recalced, doneToday: recalced.doneDate === d };
+      });
+      set({ events, weekEvents, routines, schedules: schedulesRaw, loading: false });
+    }, undefined),
+
+  ensureSeeded: async () =>
+    guard(async () => {
+      if (!routineRepo) return;
+      const { settings, update } = useSettings.getState();
+      if (settings.seededRoutines) return;
+      const existing = await routineRepo.list();
+      if (existing.length === 0) {
+        for (const r of defaultRoutines()) {
+          await routineRepo.insert(r);
+        }
       }
-    }
-    update({ seededRoutines: true });
-  },
+      update({ seededRoutines: true });
+    }, undefined),
 
-  createEvent: async (input) => {
-    if (!repo) return false;
-    const start = snap(input.start);
-    const end = snap(input.end);
-    const candidate = { start, end };
-    if (!canAdd(candidate, get().events)) return false;
-    const now = Date.now();
-    const event: Event = {
-      id: uid('e'),
-      date: get().date,
-      start,
-      end,
-      category: input.category,
-      label: input.label,
-      predicted: input.predicted ?? false,
-      source: input.source ?? 'manual',
-      createdAt: now,
-      updatedAt: now,
-    };
-    await repo.insert(event);
-    await get().load();
-    return true;
-  },
+  createEvent: async (input) =>
+    guard(async () => {
+      if (!repo) return false;
+      const start = snap(input.start);
+      const end = snap(input.end);
+      const candidate = { start, end };
+      if (!canAdd(candidate, get().events)) return false;
+      const now = Date.now();
+      const event: Event = {
+        id: uid('e'),
+        date: get().date,
+        start,
+        end,
+        category: input.category,
+        label: input.label,
+        predicted: input.predicted ?? false,
+        source: input.source ?? 'manual',
+        createdAt: now,
+        updatedAt: now,
+      };
+      await repo.insert(event);
+      await get().load();
+      return true;
+    }, false),
 
-  applyPredictedEvents: async (items) => {
-    if (!repo || items.length === 0) return;
-    const existingIds = new Set(get().events.map((e) => e.id));
-    // 以本地副本累加本批已寫入者,避免同批互相重疊的候選全部通過
-    const taken: Array<Pick<Event, 'start' | 'end' | 'id'>> = [...get().events];
-    const now = Date.now();
-    let inserted = false;
-    for (const e of items) {
-      if (existingIds.has(e.id)) continue;
-      if (!canAdd(e, taken)) continue;
-      await repo.insert({ ...e, createdAt: now, updatedAt: now });
-      taken.push(e);
-      existingIds.add(e.id);
-      inserted = true;
-    }
-    if (inserted) await get().load();
-  },
+  applyPredictedEvents: async (items) =>
+    guard(async () => {
+      if (!repo || items.length === 0) return;
+      const existingIds = new Set(get().events.map((e) => e.id));
+      // 以本地副本累加本批已寫入者,避免同批互相重疊的候選全部通過
+      const taken: Array<Pick<Event, 'start' | 'end' | 'id'>> = [...get().events];
+      const now = Date.now();
+      let inserted = false;
+      for (const e of items) {
+        if (existingIds.has(e.id)) continue;
+        if (!canAdd(e, taken)) continue;
+        await repo.insert({ ...e, createdAt: now, updatedAt: now });
+        taken.push(e);
+        existingIds.add(e.id);
+        inserted = true;
+      }
+      if (inserted) await get().load();
+    }, undefined),
 
-  updateEvent: async (id, patch) => {
-    if (!repo) return;
-    const e = get().events.find((x) => x.id === id);
-    if (!e) return;
-    await repo.update({ ...e, ...patch, updatedAt: Date.now() });
-    await get().load();
-  },
+  updateEvent: async (id, patch) =>
+    guard(async () => {
+      if (!repo) return;
+      const e = get().events.find((x) => x.id === id);
+      if (!e) return;
+      await repo.update({ ...e, ...patch, updatedAt: Date.now() });
+      await get().load();
+    }, undefined),
 
-  confirmEvent: async (id) => {
-    if (!repo) return;
-    const e = get().events.find((x) => x.id === id);
-    if (!e) return;
-    // 確認預測 = predicted:false 且不可逆(ARCHITECTURE invariant)
-    await repo.update({ ...e, predicted: false, updatedAt: Date.now() });
-    await get().load();
-  },
+  confirmEvent: async (id) =>
+    guard(async () => {
+      if (!repo) return;
+      const e = get().events.find((x) => x.id === id);
+      if (!e) return;
+      // 確認預測 = predicted:false 且不可逆(ARCHITECTURE invariant)
+      await repo.update({ ...e, predicted: false, updatedAt: Date.now() });
+      await get().load();
+    }, undefined),
 
-  deleteEvent: async (id) => {
-    if (!repo) return;
-    await repo.remove(id);
-    await get().load();
-  },
+  deleteEvent: async (id) =>
+    guard(async () => {
+      if (!repo) return;
+      await repo.remove(id);
+      await get().load();
+    }, undefined),
 
-  toggleRoutine: async (id) => {
-    if (!routineRepo) return;
-    const today = get().date;
-    const r = get().routines.find((x) => x.id === id);
-    if (!r) return;
-    const nowDone = !r.doneToday;
-    // 當日完成 → +1;當日取消 → −1(ARCHITECTURE streak 規則)
-    const next: Routine = {
-      ...r,
-      streak: Math.max(0, r.streak + (nowDone ? 1 : -1)),
-      doneDate: nowDone ? today : null,
-    };
-    await routineRepo.update(next);
-    set((s) => ({
-      routines: s.routines.map((x) =>
-        x.id === id ? { ...next, doneToday: nowDone } : x
-      ),
-    }));
-  },
+  toggleRoutine: async (id) =>
+    guard(async () => {
+      if (!routineRepo) return;
+      const today = get().date;
+      const r = get().routines.find((x) => x.id === id);
+      if (!r) return;
+      const nowDone = !r.doneToday;
+      // 當日完成 → +1;當日取消 → −1(ARCHITECTURE streak 規則)
+      const next: Routine = {
+        ...r,
+        streak: Math.max(0, r.streak + (nowDone ? 1 : -1)),
+        doneDate: nowDone ? today : null,
+      };
+      await routineRepo.update(next);
+      set((s) => ({
+        routines: s.routines.map((x) =>
+          x.id === id ? { ...next, doneToday: nowDone } : x
+        ),
+      }));
+    }, undefined),
 
-  addRoutine: async (input) => {
-    if (!routineRepo) return;
-    await routineRepo.insert({
-      id: uid('r'),
-      label: input.label,
-      timeHint: input.timeHint,
-      streak: 0,
-      doneDate: null,
-    });
-    await get().load();
-  },
+  addRoutine: async (input) =>
+    guard(async () => {
+      if (!routineRepo) return;
+      await routineRepo.insert({
+        id: uid('r'),
+        label: input.label,
+        timeHint: input.timeHint,
+        streak: 0,
+        doneDate: null,
+      });
+      await get().load();
+    }, undefined),
 
-  removeRoutine: async (id) => {
-    if (!routineRepo) return;
-    await routineRepo.remove(id);
-    set((s) => ({ routines: s.routines.filter((x) => x.id !== id) }));
-  },
+  removeRoutine: async (id) =>
+    guard(async () => {
+      if (!routineRepo) return;
+      await routineRepo.remove(id);
+      set((s) => ({ routines: s.routines.filter((x) => x.id !== id) }));
+    }, undefined),
 
-  saveSchedule: async (item) => {
-    if (!scheduleRepo) return;
-    const exists = get().schedules.some((s) => s.id === item.id);
-    if (exists) {
-      await scheduleRepo.update(item);
-    } else {
-      await scheduleRepo.insert(item);
-    }
-    await get().load();
-  },
+  saveSchedule: async (item) =>
+    guard(async () => {
+      if (!scheduleRepo) return;
+      const exists = get().schedules.some((s) => s.id === item.id);
+      if (exists) {
+        await scheduleRepo.update(item);
+      } else {
+        await scheduleRepo.insert(item);
+      }
+      await get().load();
+    }, undefined),
 
-  deleteSchedule: async (id) => {
-    if (!scheduleRepo) return;
-    await scheduleRepo.remove(id);
-    set((s) => ({ schedules: s.schedules.filter((x) => x.id !== id) }));
-  },
+  deleteSchedule: async (id) =>
+    guard(async () => {
+      if (!scheduleRepo) return;
+      await scheduleRepo.remove(id);
+      set((s) => ({ schedules: s.schedules.filter((x) => x.id !== id) }));
+    }, undefined),
 }));
+
+/**
+ * 資料操作防護(P1):錯誤寫入 store.error(併解除 loading),
+ * 回傳 fallback——呼叫端不會收到 unhandled rejection。
+ */
+async function guard<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (e) {
+    useTodayStore.setState({
+      error: e instanceof Error ? e.message : String(e),
+      loading: false,
+    });
+    return fallback;
+  }
+}
 
 // 走查/debug 用:暴露 store 到 window(web only;限開發模式)
 import { Platform } from 'react-native';

@@ -167,3 +167,41 @@ describe('applyPredictedEvents(smartTick 落地;P0-1 回歸:預測結果原先�
     expect(useTodayStore.getState().events).toHaveLength(0);
   });
 });
+
+describe('錯誤防護(P1:資料層失敗不外拋,寫入 error 狀態)', () => {
+  class FailingEventRepository extends InMemoryEventRepository {
+    async insert(_event: import('../../domain/events').Event): Promise<void> {
+      throw new Error('sqlite write failed');
+    }
+  }
+
+  it('寫入失敗:createEvent 回 false、error 帶技術訊息、clearError 清除', async () => {
+    __resetForTest();
+    useTodayStore.getState().attach(new FailingEventRepository(), new InMemoryRoutineRepository(seedRoutines));
+    useTodayStore.setState({ date: TODAY, events: [], routines: [], weekEvents: [] });
+
+    const ok = await useTodayStore.getState().createEvent({
+      start: 9, end: 10, category: 'work', label: 'X',
+    });
+    expect(ok).toBe(false);
+    expect(useTodayStore.getState().error).toBe('sqlite write failed');
+
+    useTodayStore.getState().clearError();
+    expect(useTodayStore.getState().error).toBeNull();
+  });
+
+  it('讀取失敗:load 不外拋、loading 復位', async () => {
+    __resetForTest();
+    class FailingListRepo extends InMemoryEventRepository {
+      async listByDate(_date: string): Promise<import('../../domain/events').Event[]> {
+        throw new Error('sqlite read failed');
+      }
+    }
+    useTodayStore.getState().attach(new FailingListRepo(), new InMemoryRoutineRepository(seedRoutines));
+    useTodayStore.setState({ date: TODAY, events: [], routines: [], weekEvents: [] });
+
+    await useTodayStore.getState().load(TODAY);
+    expect(useTodayStore.getState().error).toBe('sqlite read failed');
+    expect(useTodayStore.getState().loading).toBe(false);
+  });
+});

@@ -9,7 +9,11 @@
     "save": "儲存",
     "close": "關閉",
     "decrement": "減少",
-    "increment": "增加"
+    "increment": "增加",
+    "error": "發生錯誤",
+    "errorSave": "儲存失敗，部分變更可能未保存",
+    "errorBoundaryBody": "畫面發生未預期的問題，請重試；若持續發生請重新啟動 App。",
+    "retry": "重試"
   },
   "tabs": {
     "today": "今天",
