@@ -23,6 +23,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import i18n from '../i18n';
 import { useSettings } from '../state/settings';
 import { color } from '../theme';
+import { ErrorBoundary } from '../components/error-boundary';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -55,10 +56,12 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.root}>
-        <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }} />
-      </View>
+      <ErrorBoundary>
+        <View style={styles.root}>
+          <StatusBar style="dark" />
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }} />
+        </View>
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }
