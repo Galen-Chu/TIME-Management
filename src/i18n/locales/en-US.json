@@ -79,9 +79,11 @@
   "toast": {
     "detect": "You've been at \"{{place}}\" for {{minutes}} min — were you {{activity}}?",
     "view": "View & confirm",
+    "unknownPlace": "Unnamed place",
     "activity": { "work": "working" }
   },
   "notify": {
+    "detectTitle": "Context detected",
     "push": {
       "predictedTitle": "Prediction to confirm",
       "upcomingTitle": "Starting soon",

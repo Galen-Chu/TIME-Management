@@ -126,3 +126,44 @@ describe('種子例行工事(一次性播種;回歸:原先不寫入 repo,streak 
     expect(useTodayStore.getState().routines).toHaveLength(0);
   });
 });
+
+describe('applyPredictedEvents(smartTick 落地;P0-1 回歸:預測結果原先被丟棄)', () => {
+  function pred(id: string, start: number, end: number) {
+    return {
+      id, date: TODAY, start, end,
+      category: 'work' as const,
+      label: '',
+      predicted: true as const,
+      source: 'predicted' as const,
+    };
+  }
+
+  it('寫入待確認事件並保留傳入 id;重複呼叫不複製(冪等)', async () => {
+    await setup();
+    await useTodayStore.getState().applyPredictedEvents([pred('pred-1', 15, 16)]);
+    expect(useTodayStore.getState().events).toHaveLength(1);
+    expect(useTodayStore.getState().events[0]).toMatchObject({ id: 'pred-1', predicted: true });
+    await useTodayStore.getState().applyPredictedEvents([pred('pred-1', 15, 16)]);
+    expect(useTodayStore.getState().events).toHaveLength(1);
+  });
+
+  it('與既有事件重疊、或同批互相重疊的候選被略過', async () => {
+    await setup();
+    await useTodayStore.getState().createEvent({ start: 9, end: 12, category: 'work', label: 'A' });
+    await useTodayStore.getState().applyPredictedEvents([
+      pred('p1', 10, 11), // 與 A 重疊
+      pred('p2', 14, 15), // OK
+      pred('p3', 14.5, 15.5), // 與 p2 同批重疊
+    ]);
+    const ids = useTodayStore.getState().events.map((e) => e.id);
+    expect(ids).toContain('p2');
+    expect(ids).not.toContain('p1');
+    expect(ids).not.toContain('p3');
+  });
+
+  it('空陣列不觸發 load(事件狀態不變)', async () => {
+    await setup();
+    await useTodayStore.getState().applyPredictedEvents([]);
+    expect(useTodayStore.getState().events).toHaveLength(0);
+  });
+});

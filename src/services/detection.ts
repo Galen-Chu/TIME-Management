@@ -6,6 +6,7 @@
  * 原始軌跡只在記憶體/裝置端使用(NFR-1)。
  */
 import type { CategoryKey } from '../domain/categories';
+import { snap } from '../domain/events';
 
 /** 停留判定參數(原型:45 分鐘) */
 export const DWELL_MIN_MINUTES = 45;
@@ -86,4 +87,21 @@ export function detectDwell(
     };
   }
   return null;
+}
+
+/** DwellCandidate → 偵測建議事件的時間(0–24、步階 0.25;FR-DTC「查看並確認」用) */
+export function dwellToSuggestion(c: DwellCandidate): {
+  eventStart: number;
+  eventEnd: number;
+} {
+  const d = new Date(c.startTime);
+  const start = d.getHours() + d.getMinutes() / 60;
+  const end = Math.min(
+    new Date(c.endTime).getHours() + new Date(c.endTime).getMinutes() / 60,
+    24
+  );
+  return {
+    eventStart: snap(start),
+    eventEnd: Math.max(snap(end), snap(start) + 0.25),
+  };
 }

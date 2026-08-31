@@ -43,9 +43,13 @@ describe('checkEventReminder', () => {
     if (r.type === 'push') expect(r.titleKey).toBe('notify.push.predictedTitle');
   });
 
-  it('溫和模式:App 內卡片(不推播)', () => {
+  it('溫和模式:App 內卡片(不推播),附文案 key 與參數', () => {
     const r = checkEventReminder({ event, currentHour: 9.8, leadTime: 15, notifyStyle: 'gentle', quietHoursOn: true });
     expect(r.type).toBe('in-app-card');
+    if (r.type === 'in-app-card') {
+      expect(r.titleKey).toBe('notify.push.upcomingTitle');
+      expect(r.bodyParams).toEqual({ label: '會議', minutes: 12 });
+    }
   });
 
   it('免打擾+push:降級為 App 內', () => {
