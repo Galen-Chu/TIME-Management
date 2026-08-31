@@ -3,7 +3,6 @@
  */
 import { smartTick } from '../smart-tick';
 import type { Event } from '../../domain/events';
-import type { Routine } from '../../data/routine-types';
 import type { ScheduleItem } from '../../data/schedule-types';
 
 function ev(date: string, start: number, end: number, category: Event['category'] = 'work', predicted = false): Event {

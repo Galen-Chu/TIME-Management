@@ -6,6 +6,7 @@
 import { useEffect, useRef } from 'react';
 import type { PropsWithChildren } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { color, radius, shadow } from '../../theme';
 
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function BottomSheet({ visible, onClose, children }: PropsWithChildren<Props>) {
+  const { t } = useTranslation();
   const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function BottomSheet({ visible, onClose, children }: PropsWithChildren<Pr
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
       <Animated.View style={[StyleSheet.absoluteFill, styles.mask, { opacity: progress }]} pointerEvents="auto">
-        <Pressable accessibilityLabel="close sheet" style={StyleSheet.absoluteFill} onPress={onClose} />
+        <Pressable accessibilityLabel={t('common.close')} style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
       <Animated.View style={[styles.panel, { transform: [{ translateY }] }]} pointerEvents="auto">
         <View style={styles.handle} />

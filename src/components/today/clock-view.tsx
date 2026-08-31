@@ -5,8 +5,8 @@ import Svg, { Circle, G, Line, Path } from 'react-native-svg';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { CATEGORY_KEYS, categoryLabelKey, type CategoryKey } from '../../domain/categories';
-import { durationOf, hoursByCategory, nowHours, type Event } from '../../domain/events';
+import { CATEGORY_KEYS, categoryLabelKey } from '../../domain/categories';
+import { hoursByCategory, nowHours, type Event } from '../../domain/events';
 import { formatClock, formatHours } from '../../i18n/format';
 import { currentLanguage, useSettings } from '../../state/settings';
 import { categoryColor, clock, color, font } from '../../theme';
@@ -44,17 +44,17 @@ function Segment({ start, end, catColor }: { start: number; end: number; catColo
   );
 }
 
-export function ClockView({ events }: { events: Event[] }) {
+export function ClockView({ events, now }: { events: Event[]; now?: Date }) {
   const { t } = useTranslation();
   const settings = useSettings((s) => s.settings);
   const lang = currentLanguage(settings);
-  const now = nowHours();
+  const nowH = nowHours(now);
 
   const confirmed = events.filter((e) => !e.predicted);
   const current =
-    confirmed.find((e) => now >= e.start && now < e.end) ??
+    confirmed.find((e) => nowH >= e.start && nowH < e.end) ??
     // 跨午夜:23-2 在 01:00 進行中
-    confirmed.find((e) => e.end < e.start && (now >= e.start || now < e.end)) ??
+    confirmed.find((e) => e.end < e.start && (nowH >= e.start || nowH < e.end)) ??
     null;
 
   const totals = hoursByCategory(confirmed);
@@ -63,7 +63,7 @@ export function ClockView({ events }: { events: Event[] }) {
     hours: totals[k] ?? 0,
   }));
 
-  const needleDeg = (now / 24) * 360;
+  const needleDeg = (nowH / 24) * 360;
 
   return (
     <View style={styles.wrap}>
@@ -86,7 +86,7 @@ export function ClockView({ events }: { events: Event[] }) {
           </G>
         </Svg>
         <View style={styles.center} pointerEvents="none">
-          <Text style={styles.centerTime}>{formatClock(now)}</Text>
+          <Text style={styles.centerTime}>{formatClock(nowH)}</Text>
           <Text style={styles.centerActivity} numberOfLines={2}>
             {current ? `${t('today.currentActivity')} · ${current.label}` : t('today.noActivity')}
           </Text>

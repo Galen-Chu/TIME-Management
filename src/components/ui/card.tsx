@@ -4,7 +4,7 @@
 import type { PropsWithChildren } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { color, radius, shadow, spacing } from '../../theme';
+import { radius, shadow, spacing } from '../../theme';
 
 interface Props {
   style?: StyleProp<ViewStyle>;

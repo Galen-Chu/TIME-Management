@@ -126,6 +126,12 @@ export function shiftDate(date: string, days: number): string {
   return toDateKey(d);
 }
 
+/** 週一=1 … 週日=7(全案週一為首的唯一實作,勿再各自內聯) */
+export function weekdayIndex(date: string): number {
+  const d = new Date(`${date}T00:00:00`).getDay();
+  return d === 0 ? 7 : d;
+}
+
 /** 目前時刻的 0–24 小數(現在線) */
 export function nowHours(d = new Date()): number {
   return d.getHours() + d.getMinutes() / 60;

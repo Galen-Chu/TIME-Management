@@ -27,9 +27,20 @@ describe('checkEventReminder', () => {
     expect(r.type).toBe('none');
   });
 
-  it('進入 leadTime 窗口:推播(push)', () => {
+  it('進入 leadTime 窗口:推播(push),文案為 i18n key + 參數', () => {
     const r = checkEventReminder({ event, currentHour: 9.8, leadTime: 15, notifyStyle: 'push', quietHoursOn: true });
     expect(r.type).toBe('push');
+    if (r.type === 'push') {
+      expect(r.titleKey).toBe('notify.push.upcomingTitle');
+      expect(r.bodyParams).toEqual({ label: '會議', minutes: 12 });
+    }
+  });
+
+  it('預測事件的推播標題採 predictedTitle key', () => {
+    const predicted = { id: 'e3', start: 10, label: '推測工作', predicted: true };
+    const r = checkEventReminder({ event: predicted, currentHour: 9.8, leadTime: 15, notifyStyle: 'push', quietHoursOn: false });
+    expect(r.type).toBe('push');
+    if (r.type === 'push') expect(r.titleKey).toBe('notify.push.predictedTitle');
   });
 
   it('溫和模式:App 內卡片(不推播)', () => {

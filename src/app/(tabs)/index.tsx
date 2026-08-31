@@ -16,21 +16,27 @@ import { TimelineView } from '../../components/today/timeline-view';
 import { WeekView } from '../../components/today/week-view';
 import { Segmented } from '../../components/ui/segmented';
 import { formatHeaderDate } from '../../i18n/format';
-import { nowHours, type Event } from '../../domain/events';
+import { nowHours, snap, type Event } from '../../domain/events';
 import type { CategoryKey } from '../../domain/categories';
 import { smartTick } from '../../services/smart-tick';
+import { useNow } from '../../hooks/use-now';
 import { useTodayStore } from '../../state/todayStore';
-import { useSettings } from '../../state/settings';
+import { currentLanguage, useSettings } from '../../state/settings';
 import { color, font, spacing } from '../../theme';
 
 type DayWeek = 'day' | 'week';
 type DayStyle = 'linear' | 'clock' | 'blocks';
+
+const TICK_INTERVAL_MS = 5 * 60 * 1000; // smartTick 週期(ARCHITECTURE)
+const DEMO_DETECTION_DELAY_MS = 10_000; // Phase 4 偵測示範:掛載後 10 秒
+const DEFAULT_EVENT_DURATION_H = 1; // 點空白新增的預設時長
 
 export default function TodayScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { date, events, weekEvents, routines, schedules, load, createEvent } = useTodayStore();
   const settings = useSettings((s) => s.settings);
+  const now = useNow(); // 驅動現在線/時鐘指針的即時時刻
 
   const [dayWeek, setDayWeek] = useState<DayWeek>('day');
   const [style, setStyle] = useState<DayStyle>('linear');
@@ -61,11 +67,11 @@ export default function TodayScreen() {
       });
     };
     tick();
-    const interval = setInterval(tick, 5 * 60 * 1000);
+    const interval = setInterval(tick, TICK_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [date, schedules, events, routines, weekEvents, settings, createEvent]);
 
-  const headerDate = formatHeaderDate(new Date(`${date}T00:00:00`), 'zh-TW');
+  const headerDate = formatHeaderDate(new Date(`${date}T00:00:00`), currentLanguage(settings));
   const closeSheet = () => {
     setSelected(null);
     setCreating(null);
@@ -77,16 +83,16 @@ export default function TodayScreen() {
       const hour = nowHours();
       if (hour > settings.sleepEnd && hour < settings.sleepStart) {
         setDetection({
-          place: '示範地點 · 內湖辦公室',
+          place: t('today.demoPlace'),
           minutes: 45,
           categoryGuess: 'work',
-          eventStart: Math.round((hour - 0.75) * 4) / 4,
-          eventEnd: Math.round(hour * 4) / 4,
+          eventStart: snap(hour - 0.75),
+          eventEnd: snap(hour),
         });
       }
-    }, 10000);
+    }, DEMO_DETECTION_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [settings.sleepStart, settings.sleepEnd]);
+  }, [t, settings.sleepStart, settings.sleepEnd]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -136,12 +142,13 @@ export default function TodayScreen() {
               <View style={[styles.viewSlot, style !== 'linear' && styles.viewHidden]}>
                 <TimelineView
                   events={events}
+                  now={now}
                   onSelect={setSelected}
-                  onCreate={(start) => setCreating({ start, end: start + 1 })}
+                  onCreate={(start) => setCreating({ start, end: start + DEFAULT_EVENT_DURATION_H })}
                 />
               </View>
               <View style={[styles.viewSlot, style !== 'clock' && styles.viewHidden]}>
-                <ClockView events={events} />
+                <ClockView events={events} now={now} />
               </View>
               <View style={[styles.viewSlot, style !== 'blocks' && styles.viewHidden]}>
                 <BlocksView onSelect={setSelected} />

@@ -6,7 +6,10 @@
     "next": "繼續",
     "start": "開始使用",
     "skip": "跳過",
-    "save": "儲存"
+    "save": "儲存",
+    "close": "關閉",
+    "decrement": "減少",
+    "increment": "增加"
   },
   "tabs": {
     "today": "今天",
@@ -61,7 +64,9 @@
     "weekHint": "每一格都是已存入紀錄的真實時間分配，長按可查看該天完整明細。",
     "currentActivity": "目前進行中",
     "legendTotal": "共 {{n}} 小時",
-    "noActivity": "尚未記錄"
+    "noActivity": "尚未記錄",
+    "addEvent": "新增事件",
+    "demoPlace": "示範地點 · 內湖辦公室"
   },
   "sheet": {
     "confirmTitle": "確認這段時間在做什麼？",
@@ -75,6 +80,13 @@
     "detect": "偵測到你在「{{place}}」停留 {{minutes}} 分鐘 — 是在{{activity}}嗎？",
     "view": "查看並確認",
     "activity": { "work": "工作" }
+  },
+  "notify": {
+    "push": {
+      "predictedTitle": "預測待確認",
+      "upcomingTitle": "即將開始",
+      "body": "{{label}} · {{minutes}} 分鐘後開始"
+    }
   },
   "stats": {
     "title": "統計分析",

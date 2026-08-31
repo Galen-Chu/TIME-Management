@@ -4,7 +4,6 @@
  */
 import { dueSchedulesToEvents } from './notification';
 import { predictNext } from './prediction';
-import { CONFIDENCE_THRESHOLDS } from './prediction';
 import type { Event } from '../domain/events';
 import type { ScheduleItem } from '../data/schedule-types';
 import type { Routine } from '../data/routine-types';
@@ -50,7 +49,8 @@ export function smartTick(
         start: c.start,
         end: c.end,
         category: c.category,
-        label: c.label || `${c.reason === 'routine' ? '例行' : '預測'} · ${c.reason}`,
+        // label 留空時由 UI 依類別顯示(prediction.ts 註記的約定)
+        label: c.label,
         predicted: true,
         source: 'predicted',
       });

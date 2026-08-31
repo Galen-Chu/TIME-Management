@@ -7,7 +7,6 @@ import {
   inSleepWindow,
   nextRoutineTime,
   predictNext,
-  scheduleToEvent,
 } from '../prediction';
 import type { Event } from '../../domain/events';
 import type { Routine } from '../../data/routine-types';
@@ -65,22 +64,22 @@ describe('historyModeAt', () => {
   });
 });
 
-describe('scheduleToEvent(§A4)', () => {
-  it('排程 → predicted:true + source:predicted 事件', () => {
-    const r = scheduleToEvent(
-      { id: 's1', title: '晨間瑜伽', category: 'exercise', time: 7, durationH: 1 },
-      '2026-08-25'
-    );
-    expect(r.event).toMatchObject({
-      id: 'sched-s1-2026-08-25',
-      date: '2026-08-25',
-      start: 7,
-      end: 8,
-      category: 'exercise',
-      label: '晨間瑜伽',
-      predicted: true,
-      source: 'predicted',
-    });
+describe('nextRoutineTime(日期感知待辦)', () => {
+  it('今天已完成的例行不算待辦;未完成的算', () => {
+    const doneToday = routine('a', '18:00', true); // doneDate = 2026-08-25
+    const notDone = routine('b', '19:00', false);
+    const r = nextRoutineTime([doneToday, notDone], 10, '2026-08-25');
+    expect(r?.id).toBe('b');
+  });
+
+  it('過去日期完成、今天未完成 → 視為待辦(回歸:原比較 < \'\' 恆假)', () => {
+    const doneYesterday = { ...routine('c', '18:00', true), doneDate: '2026-08-24' };
+    expect(nextRoutineTime([doneYesterday], 10, '2026-08-25')?.id).toBe('c');
+  });
+
+  it('timeHint 已過的今天待辦不回傳', () => {
+    const r = nextRoutineTime([routine('d', '07:15', false)], 12, '2026-08-25');
+    expect(r).toBeNull();
   });
 });
 
