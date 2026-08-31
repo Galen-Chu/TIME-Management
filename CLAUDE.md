@@ -13,6 +13,7 @@ TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。**開發完�
 - **Phase 3/4 已驗收合併(7745db6/db2a22a)**:prediction(規則式,敏感度門檻+彈性+非規律)、notification(leadTime/免打擾/排程到點)、detection(停留判定+Toast 流程)、smartTick 整合;86 測試全綠
 - **Phase 0-5 全部完成並驗收合併(最終 merge 0b94e0a)**
 - **Phase 6 完整驗收完成並合併(merge 5384cb0)**:docs/ACCEPTANCE.md 記錄 **132/132 全綠**(5 情境 36 步+86 回歸+雙語 E2E 10 項);2026-08-31 覆核 tsc/Jest 86/lint 全綠——**Phase 0–6 開發全程完成**
+- **優化 Batch 1 已驗收合併(merge 78f186b,2026-08-31)**:P0 正確性修復(種子例行工事一次性播種、nextRoutineTime 日期感知、服務層雙語漏洞+no-raw-cjk 掃描測試、useNow 活時鐘)+ P4 清理(11 個未用依賴、死碼、重複邏輯收斂、noUnusedLocals、react-hooks lint、typecheck/verify scripts、GitHub Actions CI);**91/91 測試**、web export 全路由。後續批次:Batch 2=P0-1 預測接線+P0-2 通知/定位平台接線(需 dev client)、Batch 3=P1 錯誤處理、Batch 4=P2 效能、P3 測試補強
 
 ## 文件地圖
 
