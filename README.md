@@ -1,6 +1,7 @@
 # ⏳ TimeCare · 24 小時時間管理
 
 > 溫柔紀錄 24 小時的每一刻 — AI 預測作息、一鍵確認、支援彈性與非規律生活，並提供英中雙語（zh-TW / en-US）的時間管理 App。設計原型來自 Claude Design（`TimeCare.dc.html`）。
+
 ---
 
 ## 🧭 Overview · 專案概況
