@@ -21,6 +21,7 @@ TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。**開發完�
 - **優化系列完結(2026-08-31,五批全數驗收合併)**:測試 86 → 132、移除 11 依賴與 scaffold、錯誤處理/預測接線/平台連接埠/訂閱粒度完備。**剩餘待辦**(依優先序):① dev client 真機建置與驗收(工程側 2026-10-07 已備;依 `docs/DEVCLIENT.md` 執行)② 彈性作息區間顯示(Event schema 擴充+SQLite migration v4)③「刪除排程自動事件不再重生」產品決策(需 dismissed 記錄)④ web 資料持久化(若 web 為正式交付目標)
 - **Dev client 工程側完成(2026-10-07)**:待辦①的工程側——`expo-dev-client`(~57.0.19)、bundle id `com.galenchu.timecare`(ios/android)、`eas.json`(development/preview/production)、維護者手冊 `docs/DEVCLIENT.md`(EAS 設定→建置→真機驗收 8 項檢查表,映射 Batch 2 已知邊界:提醒僅前景/定位/降級);雲端建置與真機驗收由維護者依手冊執行,檢查表全數通過才關閉待辦①
 - **品牌資源修正(2026-10-07)**:Expo 模板圖示(藍圖藍+折角)全數換為品牌時鐘——幾何時鐘=墨棕圓環+陶土橘時針與中心點+四向刻度,`scripts/make-brand-icons.ps1` 重跑可再現(**限 pwsh 7;WinPS 5.1 誤讀無 BOM UTF-8 中文註解為 CP950 會靜默漏行,實測踩過**);app.json:splash 與 adaptiveIcon 背景模板藍(#208AEF/#E6F4FE)→奶油 `#FBF5EC`、`userInterfaceStyle` automatic→light(全 app 無深色盤,避免深色系統下系統面不一致)、`ios.icon` 改指 `assets/images/icon.png` 並刪除模板向量資料夾 `assets/expo.icon/`
+- **依賴保鮮(2026-10-07)**:SDK 57 全套對齊最新(expo ~57.0.27、expo-* 家族、RN 0.86.3、jest-expo ~57.0.5、@types/jest 降回 ~29.5.14 配 jest 29;i18next/eslint/@typescript-eslint/@types/node 範圍內更新)。教訓二則:①`expo install --fix` 撞 jest-preset peer ERESOLVE——解法為「直接改 package.json 版本範圍+刪 node_modules 與 lock 全新解析」;②**全新解析抖出 expo-router 必要 peer `expo-constants` 未直裝**(expo-doctor:Expo Go 外會崩;舊 lock 的平坦解析一直沒發現)——已補裝,expo-doctor 21/21 通過。npm audit 既有警示屬 RN 生態傳遞依賴,維持不動(不自動 --force)
 
 ## 文件地圖
 
