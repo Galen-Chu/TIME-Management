@@ -28,6 +28,7 @@ TimeCare 不是另一個行事曆，而是一支「**全時段覆蓋**」的時�
 
 > **開發全程完成（2026-08-31 收尾歸檔）**：Phase 0–6 全數驗收合併；覆核 `tsc`／Jest 86 測試／`lint` 全綠。
 > **優化系列完成（同日，五批）**：P0 正確性修復、平台服務接線（定位/通知）、P1 錯誤處理、P2 效能（訂閱粒度/精準更新）、P3 測試補強；測試 86 → **132**，CI（GitHub Actions）全綠。
+> **Dev client 工程側（2026-10-07）**：`expo-dev-client`＋`eas.json`＋bundle id 已備；雲端建置與真機驗收手冊見 [docs/DEVCLIENT.md](./docs/DEVCLIENT.md)。
 
 **本機執行**(Expo SDK 57 / TypeScript strict):
 
@@ -164,6 +165,7 @@ App 以 **zh-TW 為預設語言**（原型即繁中），**en-US 為完整第二
 | [docs/I18N.md](./docs/I18N.md) | 英中雙語架構、字串對照樣張、品質檢查清單 |
 | [docs/ROADMAP.md](./docs/ROADMAP.md) | Phase 0–6 階段計畫與驗收檢查點 |
 | [docs/ACCEPTANCE.md](./docs/ACCEPTANCE.md) | Phase 6 完整驗收測試計畫與執行結果 |
+| [docs/DEVCLIENT.md](./docs/DEVCLIENT.md) | Dev client 建置步驟與真機驗收檢查表 |
 
 ---
 
