@@ -185,4 +185,25 @@ Tests:       86 passed, 86 total
 
 ---
 
+## 🔁 2026-10-07 再驗收(四批優化合併 push 後)
+
+**背景**:dev client 工程側、品牌資源、依賴保鮮(RN 0.86.3/expo 57.0.27)、測試穩定(testTimeout 15s)四批合併並 push 後,完整重跑驗收(dev server `localhost:8081`+headless Chrome,同本文件 §3 腳本 `scripts/acceptance-e2e.py`)。
+
+**結果**:
+
+| 類別 | 結果 |
+|---|---|
+| E2E 使用者情境+標準 | **36/36 全綠**(首次 35/36,修復後全過,見下) |
+| Jest 回歸 | **133/133 全綠**(132+1:新增 web 重播種測試;既有「刪光不復活」測試釘 ios 強化) |
+| 零 SEVERE console error | ✅(E2E-9) |
+
+**過程修復二項**:
+
+1. **驗收腳本選擇器過時**:Batch 5 a11y 將時間軸點擊層 aria-label 改走 i18n(「新增事件/Add event」),腳本仍找字面 `add event`→S2-1 誤失敗;腳本兩處選擇器已對齊。
+2. **真回歸(web 例行工事重載消失)**:Batch 1「一次性播種」旗標存 settings(localStorage,跨重載持久),web 的 routine repo 為 InMemory(重載即空)→ web 第一次重載後 `ensureSeeded` 被旗標擋住,例行工事**永久消失**(首次再驗收 S3-1a 揪出)。修法:空 repo 時 web 視同新安裝重播種;native(SQLite)維持「使用者刪光不復活」語意;+2 平台分支單元測試(todayStore 15 測)。
+
+**圖示驗證**:品牌時鐘圖示組以本機像素採樣驗證(icon 89% 奶油+9% 墨棕+1% 陶土橘、0% 模板藍;透明底變體正確),binary 已提交(799KB→27KB)。
+
+---
+
 *本文件為驗收執行的工作文件——各項通過後勾選;全數通過即為 App 驗收完成。*

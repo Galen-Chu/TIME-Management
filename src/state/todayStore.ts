@@ -145,12 +145,17 @@ export const useTodayStore = create<TodayStore>((set, get) => ({
     guard(async () => {
       if (!routineRepo) return;
       const { settings, update } = useSettings.getState();
-      if (settings.seededRoutines) return;
       const existing = await routineRepo.list();
-      if (existing.length === 0) {
-        for (const r of defaultRoutines()) {
-          await routineRepo.insert(r);
-        }
+      if (existing.length > 0) {
+        if (!settings.seededRoutines) update({ seededRoutines: true });
+        return;
+      }
+      // 空 repo:web 的 InMemory repo 不跨頁持久,視同新安裝重播種——settings 旗標走
+      // localStorage 會跨重載,若沿用會在第一次重載後讓例行工事永久消失(P0 一次性
+      // 播種的 web 面);native(SQLite)repo 持久,旗標維持「使用者刪光不復活」語意
+      if (settings.seededRoutines && Platform.OS !== 'web') return;
+      for (const r of defaultRoutines()) {
+        await routineRepo.insert(r);
       }
       update({ seededRoutines: true });
     }, undefined),
