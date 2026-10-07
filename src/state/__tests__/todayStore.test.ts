@@ -1,6 +1,8 @@
 /**
  * todayStore 流程測試(InMemory repository):CRUD、重疊防護、確認預測、streak ±1。
  */
+import { Platform } from 'react-native';
+
 import { InMemoryEventRepository, InMemoryRoutineRepository } from '../../data/repository';
 import type { Routine } from '../../data/routine-types';
 import { __resetForTest, useTodayStore } from '../todayStore';
@@ -114,16 +116,37 @@ describe('種子例行工事(一次性播種;回歸:原先不寫入 repo,streak 
     expect(r?.doneToday).toBe(true);
   });
 
-  it('旗標已設 + 使用者刪光 → 不再復活(load 顯示空狀態)', async () => {
+  it('旗標已設 + 使用者刪光 → 不再復活(load 顯示空狀態;native 語意)', async () => {
     __resetForTest();
-    useSettings.setState((s) => ({ settings: { ...s.settings, seededRoutines: true } }));
-    const routines = new InMemoryRoutineRepository();
-    useTodayStore.getState().attach(new InMemoryEventRepository(), routines);
-    await useTodayStore.getState().ensureSeeded();
-    expect(await routines.list()).toHaveLength(0);
-    useTodayStore.setState({ date: TODAY, events: [], routines: [], weekEvents: [] });
-    await useTodayStore.getState().load(TODAY);
-    expect(useTodayStore.getState().routines).toHaveLength(0);
+    const desc = Object.getOwnPropertyDescriptor(Platform, 'OS');
+    Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true });
+    try {
+      useSettings.setState((s) => ({ settings: { ...s.settings, seededRoutines: true } }));
+      const routines = new InMemoryRoutineRepository();
+      useTodayStore.getState().attach(new InMemoryEventRepository(), routines);
+      await useTodayStore.getState().ensureSeeded();
+      expect(await routines.list()).toHaveLength(0);
+      useTodayStore.setState({ date: TODAY, events: [], routines: [], weekEvents: [] });
+      await useTodayStore.getState().load(TODAY);
+      expect(useTodayStore.getState().routines).toHaveLength(0);
+    } finally {
+      if (desc) Object.defineProperty(Platform, 'OS', desc);
+    }
+  });
+
+  it('web 重載面:旗標已設(localStorage 持久)但 repo(InMemory)為空 → 重播種', async () => {
+    __resetForTest();
+    const desc = Object.getOwnPropertyDescriptor(Platform, 'OS');
+    Object.defineProperty(Platform, 'OS', { value: 'web', configurable: true });
+    try {
+      useSettings.setState((s) => ({ settings: { ...s.settings, seededRoutines: true } }));
+      const routines = new InMemoryRoutineRepository();
+      useTodayStore.getState().attach(new InMemoryEventRepository(), routines);
+      await useTodayStore.getState().ensureSeeded();
+      expect(await routines.list()).toHaveLength(3);
+    } finally {
+      if (desc) Object.defineProperty(Platform, 'OS', desc);
+    }
   });
 });
 

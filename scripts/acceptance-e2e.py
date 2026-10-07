@@ -57,8 +57,8 @@ try:
 
     # === S2 記錄一天(事件 CRUD) ===
     print("\n--- S2 記錄一天 ---")
-    # S2-1:時間軸點空白新增
-    d.execute_script("document.querySelectorAll('[aria-label=\"add event\"]')[0]?.click()")
+    # S2-1:時間軸點空白新增(aria-label 走 i18n:zh「新增事件」/en「Add event」)
+    d.execute_script("document.querySelectorAll('[aria-label=\"新增事件\"], [aria-label=\"Add event\"]')[0]?.click()")
     time.sleep(1.5)
     check("S2-1", "點空白開啟新增表單", "新增" in body())
     # S2-2:填名稱+選類別+儲存
@@ -90,7 +90,7 @@ try:
     shot("s2-4-edited")
 
     # S2-5:重疊新增被拒
-    d.execute_script("document.querySelectorAll('[aria-label=\"add event\"]')[0]?.click()")
+    d.execute_script("document.querySelectorAll('[aria-label=\"新增事件\"], [aria-label=\"Add event\"]')[0]?.click()")
     time.sleep(1.5)
     inp3 = d.find_element(By.TAG_NAME, "input")
     inp3.clear(); inp3.send_keys("重疊事件")
