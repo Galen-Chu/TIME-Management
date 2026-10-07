@@ -18,7 +18,8 @@ TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。**開發完�
 - **優化 Batch 3 已驗收合併(merge 2a4101a,2026-08-31)**:P1 錯誤處理——todayStore `guard()` 包裹全部 11 個資料動作(`error` 狀態+`clearError`)、bootstrap try/catch(SQLite 失敗不再靜默空白)、ErrorBanner 頂部橫幅、根版面 ErrorBoundary(零新依賴);**104/104 測試**(新增 RNTL v14 慣例:`await render()`、查詢取自回傳值、事件 act 包裹)
 - **優化 Batch 4 已驗收合併(merge 001da35,2026-08-31)**:P2 效能——6 處整店訂閱全改 selector(+adjust/settings)、todayStore 7 個 mutation 精準更新(不再全量 load,confirm 同步 weekEvents)、smart-tick 依賴收斂 `[date, events]`(getState 即時讀)、統計頁 useMemo;**104/104 測試**。todayStore 拆分評估為「不做」(selector+精準更新已解決粒度)
 - **優化 Batch 5 已驗收合併(merge 1ab182d,2026-08-31)——優化系列(P0–P4)收官**:P3 測試補強——`data/migrations.ts` 抽離(介面注入,+4 測試)、format.ts Intl(+12)、畫面層 RNTL(+16:blocks/timeline/week/toasts,含勾選互動與空狀態);a11y 順手補 role/label。**132/132 測試(22 套組)**,每層皆有覆蓋;CI 全綠
-- **優化系列完結(2026-08-31,五批全數驗收合併)**:測試 86 → 132、移除 11 依賴與 scaffold、錯誤處理/預測接線/平台連接埠/訂閱粒度完備。**剩餘待辦**(依優先序):① dev client 建置(驗證依賴移除後 native build+真機通知/定位+背景執行)② 彈性作息區間顯示(Event schema 擴充+SQLite migration v4)③「刪除排程自動事件不再重生」產品決策(需 dismissed 記錄)④ web 資料持久化(若 web 為正式交付目標)
+- **優化系列完結(2026-08-31,五批全數驗收合併)**:測試 86 → 132、移除 11 依賴與 scaffold、錯誤處理/預測接線/平台連接埠/訂閱粒度完備。**剩餘待辦**(依優先序):① dev client 真機建置與驗收(工程側 2026-10-07 已備;依 `docs/DEVCLIENT.md` 執行)② 彈性作息區間顯示(Event schema 擴充+SQLite migration v4)③「刪除排程自動事件不再重生」產品決策(需 dismissed 記錄)④ web 資料持久化(若 web 為正式交付目標)
+- **Dev client 工程側完成(2026-10-07)**:待辦①的工程側——`expo-dev-client`(~57.0.19)、bundle id `com.galenchu.timecare`(ios/android)、`eas.json`(development/preview/production)、維護者手冊 `docs/DEVCLIENT.md`(EAS 設定→建置→真機驗收 8 項檢查表,映射 Batch 2 已知邊界:提醒僅前景/定位/降級);雲端建置與真機驗收由維護者依手冊執行,檢查表全數通過才關閉待辦①
 
 ## 文件地圖
 
@@ -31,6 +32,7 @@ TimeCare · 24 小時時間管理 App(Galen-Chu/TIME-Management)。**開發完�
 | `docs/I18N.md` | 英中雙語規劃、字串對照樣張、QA 檢查清單 |
 | docs/ROADMAP.md | Phase 0–6 階段計畫與驗收檢查點 |
 | docs/ACCEPTANCE.md | Phase 6 完整驗收測試計畫(5 情境+86 回歸+E2E) |
+| docs/DEVCLIENT.md | Dev client 建置步驟與真機驗收檢查表(待辦①) |
 
 設計原型(互動規格最終依據):Claude Design 專案 `63891dbe-d2bd-46bc-b064-816c5dfb08f3` 的 `TimeCare.dc.html`——需專案擁有者權限,不在 repo 內;檔案與文件不一致時**以原型為互動依據、文件集為規格依據**,先修文件再修程式。
 
