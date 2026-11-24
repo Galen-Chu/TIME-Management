@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     color: color.stepperInk,
     fontSize: 16,
     lineHeight: 18,
-    fontFamily: font.karla.medium,
+    fontFamily: font.latin.medium,
   },
   value: {
     minWidth: 60,

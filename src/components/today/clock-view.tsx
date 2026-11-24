@@ -1,7 +1,7 @@
 /**
  * 時鐘盤檢視(FR-TOD 2):250px 24h 刻度盤(SVG 弧段)、中央奶油圓、即時指針、雙欄圖例。
  */
-import Svg, { Circle, G, Line, Path } from 'react-native-svg';
+import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -64,6 +64,11 @@ export function ClockView({ events, now }: { events: Event[]; now?: Date }) {
   }));
 
   const needleDeg = (nowH / 24) * 360;
+  // 「現在」以環帶上的徑向刻度線表達(內緣→外緣):端點直接以極座標算出。
+  // 不用 G rotation(react-native-svg web 會把 origin 轉成 kebab 屬性,觸發
+  // React 19 開發模式警告);也不畫進中央白盤,避免穿過時間文字。
+  const needleStart = polar(R, R, INNER_R, needleDeg);
+  const needleTip = polar(R, R, RING_R + STROKE / 2, needleDeg);
 
   return (
     <View style={styles.wrap}>
@@ -73,17 +78,15 @@ export function ClockView({ events, now }: { events: Event[]; now?: Date }) {
           {confirmed.map((e) => (
             <Segment key={e.id} start={e.start} end={e.end} catColor={categoryColor(e.category)} />
           ))}
-          <G rotation={needleDeg} origin={`${R},${R}`}>
-            <Line
-              x1={R}
-              y1={R}
-              x2={R}
-              y2={R - INNER_R + 8}
-              stroke={color.ink}
-              strokeWidth={2}
-              strokeLinecap="round"
-            />
-          </G>
+          <Line
+            x1={needleStart.x}
+            y1={needleStart.y}
+            x2={needleTip.x}
+            y2={needleTip.y}
+            stroke={color.ink}
+            strokeWidth={2}
+            strokeLinecap="round"
+          />
         </Svg>
         <View style={styles.center} pointerEvents="none">
           <Text style={styles.centerTime}>{formatClock(nowH)}</Text>

@@ -1,12 +1,12 @@
 # 品牌圖示產生器(TimeCare)——以 System.Drawing 繪製幾何時鐘,重跑可再現。
-# 對齊 docs/DESIGN-SPEC.md token:奶油底 #FBF5EC / 墨棕 #2E2A25 / 陶土橘 #E2795A。
+# 對齊 Uniconsign v0.2.0 token:暖白底 #F7F7F5 / 墨 #1A1917 / 品牌綠 #167839(2026-11-24 介面 Uniconsign 化)。
 # 用法:pwsh -File scripts/make-brand-icons.ps1(repo 根執行)
 # 注意:限 PowerShell 7(pwsh)——WinPS 5.1 將無 BOM UTF-8 中文註解誤讀為 CP950,會靜默漏行。
 Add-Type -AssemblyName System.Drawing
 
-$Cream  = [System.Drawing.ColorTranslator]::FromHtml('#FBF5EC')
-$Ink    = [System.Drawing.ColorTranslator]::FromHtml('#2E2A25')
-$Accent = [System.Drawing.ColorTranslator]::FromHtml('#E2795A')
+$Cream  = [System.Drawing.ColorTranslator]::FromHtml('#F7F7F5')
+$Ink    = [System.Drawing.ColorTranslator]::FromHtml('#1A1917')
+$Accent = [System.Drawing.ColorTranslator]::FromHtml('#167839')
 
 function New-Canvas([int]$size) {
   $bmp = [System.Drawing.Bitmap]::new($size, $size)

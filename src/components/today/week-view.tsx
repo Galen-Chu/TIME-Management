@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     overflow: 'hidden',
   },
-  total: { width: 28, textAlign: 'right', fontSize: 12, color: color.inkMuted, fontFamily: font.karla.regular },
+  total: { width: 28, textAlign: 'right', fontSize: 12, color: color.inkMuted, fontFamily: font.latin.regular },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4, width: '25%' },
   legendDot: { width: 8, height: 8, borderRadius: 4 },

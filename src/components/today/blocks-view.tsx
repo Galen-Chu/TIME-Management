@@ -14,6 +14,7 @@ import { formatHours, formatRange } from '../../i18n/format';
 import { currentLanguage, useSettings } from '../../state/settings';
 import { useTodayStore } from '../../state/todayStore';
 import { categoryColor, color, font, radius } from '../../theme';
+import { IconCheck } from '../ui/icon';
 
 interface Props {
   onSelect: (e: Event) => void;
@@ -90,7 +91,7 @@ export function BlocksView({ onSelect }: Props) {
           >
             <Card style={styles.row}>
               <View style={[styles.check, r.doneToday && styles.checkDone]}>
-                {r.doneToday ? <Text style={styles.checkMark}>✓</Text> : null}
+                {r.doneToday ? <IconCheck size={14} color="#FFFFFF" /> : null}
               </View>
               <View style={styles.rowMain}>
                 <Text style={[styles.rowTitle, r.doneToday && styles.doneTitle]}>
@@ -160,7 +161,7 @@ const styles = StyleSheet.create({
   statRow: { flexDirection: 'row', gap: 10 },
   statCard: { flex: 1, gap: 6 },
   statLabel: { fontSize: 13, color: color.inkSecondary, fontFamily: font.rounded.medium },
-  statValue: { fontSize: 24, fontFamily: font.rounded.bold, color: color.ink },
+  statValue: { fontSize: 22, fontFamily: font.rounded.bold, color: color.ink },
   sectionTitle: {
     marginTop: 8,
     marginBottom: 2,
@@ -179,7 +180,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkDone: { backgroundColor: color.success },
-  checkMark: { color: '#FFFFFF', fontSize: 14, fontFamily: font.rounded.bold },
   rowMain: { flex: 1, gap: 2 },
   rowTitle: { fontSize: 15, fontFamily: font.rounded.semibold, color: color.ink },
   doneTitle: { color: color.inkSecondary },

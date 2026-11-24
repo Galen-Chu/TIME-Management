@@ -2,12 +2,12 @@
  * Root layout:字體載入、i18n 同步、全域底色。
  */
 import {
-  Karla_400Regular,
-  Karla_500Medium,
-  Karla_600SemiBold,
-  Karla_700Bold,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
   useFonts,
-} from '@expo-google-fonts/karla';
+} from '@expo-google-fonts/inter';
 import {
   NotoSansTC_500Medium,
   NotoSansTC_600SemiBold,
@@ -35,10 +35,10 @@ export default function RootLayout() {
     'NotoSansTC-Medium': NotoSansTC_500Medium,
     'NotoSansTC-SemiBold': NotoSansTC_600SemiBold,
     'NotoSansTC-Bold': NotoSansTC_700Bold,
-    'Karla-Regular': Karla_400Regular,
-    'Karla-Medium': Karla_500Medium,
-    'Karla-SemiBold': Karla_600SemiBold,
-    'Karla-Bold': Karla_700Bold,
+    'Inter-Regular': Inter_400Regular,
+    'Inter-Medium': Inter_500Medium,
+    'Inter-SemiBold': Inter_600SemiBold,
+    'Inter-Bold': Inter_700Bold,
   });
 
   // 持久化載入後依設定同步語言(onRehydrateStorage 亦處理,此為雙保險)

@@ -1,21 +1,26 @@
 /**
  * 設計 token 完整性(DESIGN-SPEC 為唯一事實來源)。
+ * 2026-11-24 起 token 值取自 Uniconsign v0.2.0(vendor 於 src/theme/uniconsign/)。
  */
 import tokens from '../tokens.json';
 
 const SPEC_COLORS = {
-  bg: '#FBF5EC',
-  ink: '#2E2A25',
-  inkSecondary: '#8A7F72',
-  inkMuted: '#B4A99C',
-  accent: '#E2795A',
-  accentLight: '#F2B79A',
-  success: '#7C9473',
-  successLight: '#B9C7B0',
-  track: '#F0E6D8',
-  trackAlt: '#E2D9C8',
-  divider: '#EFE6D8',
-  trackSoft: '#F5EFE3',
+  bg: '#F7F7F5',
+  surface: '#FFFFFF',
+  ink: '#1A1917',
+  inkSecondary: '#5A574F',
+  inkMuted: '#9C9890',
+  accent: '#167839',
+  accentLight: '#96D4A2',
+  success: '#167839',
+  successLight: '#BBE6C3',
+  warning: '#796900',
+  danger: '#C8423B',
+  info: '#007687',
+  track: '#EEEDEA',
+  trackAlt: '#C4C1BA',
+  divider: '#DEDCD7',
+  trackSoft: '#EEEDEA',
   stepperInk: '#6E5C7E',
 };
 
