@@ -25,6 +25,40 @@
 
 ---
 
+## 🚀 TestFlight · iPhone 自用上架(2026-11-24 拍板,工程側已備)
+
+純自用走 **TestFlight 內部測試**:免 App 審查、免註冊裝置 UDID,單一 build 90 天有效,到期重新 build+submit 即可。原「dev client 真機驗收」待辦①併入此流程——以 production build 逐項跑下方檢查表。
+
+### 前置(維護者)
+
+1. Apple Developer Program 註冊([developer.apple.com/programs](https://developer.apple.com/programs/enroll/),99 USD/年;個人帳號通常 1 天內核准)
+2. Expo 帳號([expo.dev](https://expo.dev) 免費)→ `eas login`
+3. repo 根目錄執行 `eas init`——寫 `extra.eas.projectId` 進 app.json(提交此變更)
+
+### 建置與上傳
+
+| 步驟 | 指令/操作 | 備註 |
+|---|---|---|
+| 1 | `eas build --profile production --platform ios` | 首次會互動要求 Apple ID 登入;dist certificate 與 provisioning profile 由 EAS 自動建立管理(`eas credentials` 可查)。約 10–20 分鐘 |
+| 2 | `eas submit --platform ios --latest` | 需 App Store Connect API key(ASC→使用者和存取→整合),或改用 Apple ID 互動登入 |
+| 3 | App Store Connect 建立第一次的 App 記錄 | 名稱 TimeCare、primary language 繁體中文、bundle id `com.galenchu.timecare`、SKU 自訂(如 `timecare-001`) |
+| 4 | ASC → 該 App → TestFlight → 內部測試 | 建立內部群組並把自己加為測試者(上限 100 人,自己用綽綽有餘) |
+| 5 | iPhone 安裝 **TestFlight** App → 接受邀請 → 安裝 TimeCare | build 處理完成(約幾分鐘)即可安裝 |
+
+> 已設定 `ios.infoPlist.ITSAppUsesNonExemptEncryption: false`——匯出合規問答自動豁免,submit 後無需每年回覆加密問題。
+
+### 真機驗收
+
+安裝後以 **production build** 逐項跑下方「真機驗收檢查表」(8 項)——全數通過即關閉待辦①。production build 無 Metro 連線、無 dev menu,行為即上架行為;開發除錯仍可另行建置 development profile 的 dev client(見上節)。
+
+### 版本更新
+
+- build 號由 `eas.json` `production.autoIncrement` 自動遞增;App 版本號以 App Store Connect(remote,`appVersionSource: remote`)為準
+- 每次更新 = 重新 `eas build` + `eas submit`;OTA(expo-updates)未引入,更新必經重建置
+- **90 天到期**前重新上傳即可,資料不受影響(SQLite 於裝置端)
+
+---
+
 ## 🔗 安裝與連線 · Install & Connect
 
 1. 手機安裝 APK(Android 需允許「未知來源/安裝未知應用」)
