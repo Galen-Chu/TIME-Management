@@ -9,7 +9,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.galenchu.timecare"
+      "bundleIdentifier": "com.galenchu.timecare",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.galenchu.timecare",
@@ -33,6 +36,12 @@
           "backgroundColor": "#F7F7F5",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUseMessage": "TimeCare 使用您的位置偵測停留地點、記錄活動(僅 App 開啟時)。軌跡僅在此裝置處理,不會上傳。TimeCare uses your location while the app is open to detect where you spend time and log activities. Location is processed on-device only and never uploaded."
         }
       ],
       "expo-sqlite"
