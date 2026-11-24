@@ -17,10 +17,9 @@ export const fontFamily = tokens.font.family
   .filter(Boolean);
 
 /**
- * 字體方案(2026-08-25 Phase 5 拍板):
- * 原型指定 M PLUS Rounded 1c,但該字型為日文,部分繁中字粗體缺字
- * (如「溫」「你」)。全面切換至 **Noto Sans TC**(繁中完整、含 SemiBold 600),
- * Karla 保留拉丁文;M PLUS Rounded 1c 不再載入(減少 bundle)。
+ * 字體方案(2026-11-24 介面 Uniconsign 化拍板):
+ * 拉丁文 Karla → **Inter**(Uniconsign 定案);中文維持 **Noto Sans TC**
+ * (2026-08-25 Phase 5 拍板:繁中完整、含 SemiBold 600,與 Uniconsign 相同)。
  */
 import { Platform } from 'react-native';
 
@@ -34,35 +33,36 @@ export const font = {
     semibold: STACK('NotoSansTC-SemiBold'),
     bold: STACK('NotoSansTC-Bold'),
   },
-  /** Karla — 拉丁文內文 */
-  karla: {
-    regular: STACK('Karla-Regular'),
-    medium: STACK('Karla-Medium'),
-    semibold: STACK('Karla-SemiBold'),
-    bold: STACK('Karla-Bold'),
+  /** Inter — 拉丁文/數字 */
+  latin: {
+    regular: STACK('Inter-Regular'),
+    medium: STACK('Inter-Medium'),
+    semibold: STACK('Inter-SemiBold'),
+    bold: STACK('Inter-Bold'),
   },
 } as const;
 
+/** Uniconsign shadow token 的 RN 換算(卡片 sm、Toast lg、表單向上) */
 export const shadow = {
   card: {
-    shadowColor: 'rgba(60,45,30,1)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowColor: '#1A1917',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 3,
     elevation: 2,
   },
   toast: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 30,
+    shadowColor: '#1A1917',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.12,
+    shadowRadius: 40,
     elevation: 8,
   },
   sheet: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 30,
+    shadowColor: '#1A1917',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
     elevation: 8,
   },
 } as const;

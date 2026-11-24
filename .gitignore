@@ -40,5 +40,5 @@ yarn-error.*
 /ios
 /android
 
-# 走查截圖與本地紀錄
-.shots/
+# 走查截圖與本地紀錄(.shots* 涵蓋歸檔如 .shots-pre-uniconsign/)
+.shots*/

@@ -1,6 +1,6 @@
 /**
  * 事件表單 Sheet 底盤(DESIGN-SPEC):
- * 遮罩 rgba(46,42,37,0.4);面板 bg 底、上緣 radius 24、把手 36×4 trackAlt;
+ * 遮罩 rgba(26,25,23,0.4);面板 bg 底、上緣 radius sheetTop(20)、把手 36×4 trackAlt;
  * 進場 translateY 100%→0,0.3s ease。
  */
 import { useEffect, useRef } from 'react';
@@ -49,7 +49,7 @@ export function BottomSheet({ visible, onClose, children }: PropsWithChildren<Pr
 
 const styles = StyleSheet.create({
   mask: {
-    backgroundColor: 'rgba(46,42,37,0.4)',
+    backgroundColor: 'rgba(26,25,23,0.4)',
   },
   panel: {
     position: 'absolute',

@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontSize: 11,
     color: color.inkMuted,
-    fontFamily: font.karla.regular,
+    fontFamily: font.latin.regular,
     fontVariant: ['tabular-nums'],
   },
   event: {

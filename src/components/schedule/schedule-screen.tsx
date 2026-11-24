@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   back: { padding: 6 },
-  backText: { fontSize: 26, color: color.inkSecondary, fontFamily: font.karla.regular },
+  backText: { fontSize: 26, color: color.inkSecondary, fontFamily: font.latin.regular },
   title: { flex: 1, fontSize: 26, fontFamily: font.rounded.semibold, color: color.ink },
   addBtn: {
     backgroundColor: color.ink,

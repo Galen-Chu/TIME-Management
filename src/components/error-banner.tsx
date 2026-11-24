@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTodayStore } from '../state/todayStore';
 import { color, font, radius } from '../theme';
+import { IconClose } from './ui/icon';
 
 export function ErrorBanner() {
   const { t } = useTranslation();
@@ -29,7 +30,7 @@ export function ErrorBanner() {
         onPress={clearError}
         hitSlop={8}
       >
-        <Text style={styles.close}>{t('common.close')}</Text>
+        <IconClose size={16} color={color.danger} />
       </Pressable>
     </View>
   );
@@ -43,9 +44,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 6,
     padding: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: color.surface,
     borderLeftWidth: 3,
-    borderLeftColor: color.accent,
+    borderLeftColor: color.danger,
     borderRadius: radius.row,
   },
   main: { flex: 1, gap: 2 },
@@ -55,5 +56,4 @@ const styles = StyleSheet.create({
     fontFamily: font.rounded.medium,
     color: color.inkSecondary,
   },
-  close: { fontSize: 12, fontFamily: font.rounded.bold, color: color.accent },
 });

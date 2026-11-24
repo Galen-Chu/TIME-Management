@@ -13,10 +13,12 @@ import { useTranslation } from 'react-i18next';
 import { useSettings } from '../state/settings';
 import { color, font } from '../theme';
 
+// 有機形色塊漸層 = Uniconsign 品牌三色(綠/青/黃),各由 primitives 亮階到深階
+// (brand.300→600 / cyan.200→600 / yellow.300→600;vendor 檔 src/theme/uniconsign/primitives.json)
 const STEPS = [
-  { key: 's1', from: '#F2B79A', to: '#E2795A' },
-  { key: 's2', from: '#B9C7B0', to: '#7C9473' },
-  { key: 's3', from: '#DCB98A', to: '#D9A441' },
+  { key: 's1', from: '#96D4A2', to: '#167839' },
+  { key: 's2', from: '#ABE5EE', to: '#007687' },
+  { key: 's3', from: '#F2E17B', to: '#9A8700' },
 ] as const;
 
 export default function Onboarding() {

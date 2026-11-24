@@ -1,15 +1,18 @@
 # 最終走查截圖(直達 URL 模式;tab 切換 web 限制見驗收說明)
+import os
 import time
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
+OUT = r"D:\TIME-management\.shots"
+os.makedirs(OUT, exist_ok=True)
+
 opts = Options()
 opts.add_argument("--headless=new")
 opts.add_argument("--window-size=402,874")
 d = webdriver.Chrome(options=opts)
-OUT = r"D:\TIME-management\.shots"
 
 def click_text(sub, timeout=8):
     deadline = time.time() + timeout
@@ -54,7 +57,7 @@ try:
     severe = [e for e in d.get_log("browser") if e["level"] == "SEVERE"]
     print("severe console errors:", len(severe))
     for e in severe[:5]:
-        print("CONSOLE:", e["message"][:200])
+        print("CONSOLE:", e["message"][:600])
     print("FINAL_WALKTHROUGH_DONE")
 finally:
     d.quit()
