@@ -179,6 +179,7 @@
 ### Uniconsign 同步約定
 
 - `src/theme/uniconsign/{primitives,semantic}.json`：vendor 自 [Uniconsign v0.2.0](https://github.com/Galen-Chu/Uniconsign)（MIT，© Galen Chu），**逐字同步不修改**；上游改版後同步並更新版本註記（tokens.json `$description`）。
+- **vendor 是刻意架構決定，非技術債**（2026-11-25 評估 npm 依賴化，結論「不做」）：GitHub Packages 安裝需 token（×EAS 建置摩擦）、套件 icon 輸出非 RN 相容（仍需 react-native-svg 轉接層）、App 語意映射層本就自維。升級條件（多專案共用／套件輸出 RN 相容 icon／改發布 npmjs 公開註冊表，任一成立）時再切依賴，詳見 CLAUDE.md。
 - 語意對映（核心色表的「Uniconsign 對應」欄）是唯一換算依據；上游新增語意角色時於本文件擴充對映。
 - 品牌圖示（App icon/splash/favicon）：`scripts/make-brand-icons.ps1` 以 token 色重繪幾何時鐘（墨圈＋品牌綠指針/刻度/中心點＋暖白底），重跑可再現。
 
